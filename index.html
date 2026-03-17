@@ -138,23 +138,7 @@
 
     body.night .hero-sub { color: #7a7aaa; }
 
-    /* ===== TITLE ===== */
-    h1 {
-      font-size: clamp(1.6rem, 6vw, 2.8rem);
-      color: #ff5a87;
-      margin-bottom: clamp(16px, 4vw, 32px);
-      text-align: center;
-      letter-spacing: 0.06em;
-      text-shadow: 2px 3px 0 #fff, 4px 5px 0 rgba(255,100,140,0.2);
-      transition: color 0.4s, text-shadow 0.4s;
-    }
-
-    body.night h1 {
-      color: #c7a8ff;
-      text-shadow: 2px 3px 0 rgba(0,0,0,0.4), 0 0 24px rgba(180,140,255,0.5);
-    }
-
-    /* ===== GRID ===== */
+/* ===== GRID ===== */
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -550,9 +534,6 @@
   <button class="settings-btn" onclick="openSettings()" aria-label="せってい">⚙️</button>
 </div>
 
-<!-- ===== TITLE ===== -->
-<h1 id="page-title">🌈 あさのしたく</h1>
-
 <!-- ===== CARD GRID ===== -->
 <div class="grid" id="grid"></div>
 
@@ -685,7 +666,6 @@
     document.body.classList.toggle('night', mode === 'neru');
     document.getElementById('tab-asa').classList.toggle('active',  mode === 'asa');
     document.getElementById('tab-neru').classList.toggle('active', mode === 'neru');
-    document.getElementById('page-title').textContent = MODES[mode].title;
     document.getElementById('celebration').classList.remove('show');
     document.querySelectorAll('.confetti-piece').forEach(el => el.remove());
     doneCount = 0;
