@@ -16,7 +16,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 15px 40px;
+      padding: clamp(16px, 4vw, 48px) clamp(12px, 4vw, 48px) clamp(24px, 5vw, 64px);
       user-select: none;
       -webkit-user-select: none;
       transition: background 0.5s ease;
@@ -31,7 +31,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: min(680px, 100%);
+      width: min(900px, 100%);
       margin-bottom: clamp(12px, 3vw, 20px);
       position: relative;
     }
@@ -111,7 +111,7 @@
     .hero {
       text-align: center;
       margin-bottom: clamp(12px, 3vw, 24px);
-      width: min(680px, 100%);
+      width: min(900px, 100%);
     }
 
     .hero-main {
@@ -142,8 +142,8 @@
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: clamp(12px, 3vw, 22px);
-      width: min(680px, 100%);
+      gap: clamp(12px, 3vw, 28px);
+      width: min(900px, 100%);
     }
 
     /* ===== CARD FLIP ===== */
@@ -222,10 +222,10 @@
     body.night .card-wrap:nth-child(5) .card-front { border-top-color: #ffe082; }
     body.night .card-wrap:nth-child(6) .card-front { border-top-color: #ef9a9a; }
 
-    .card-icon  { font-size: clamp(2.4rem, 8vw, 4.2rem); line-height: 1; }
-    .card-label { font-size: clamp(0.85rem, 2.8vw, 1.35rem); font-weight: bold; color: #444; transition: color 0.4s; }
-    .card-check { font-size: clamp(3.2rem, 10vw, 5.5rem); line-height: 1; }
-    .card-star  { font-size: clamp(1rem, 3vw, 1.6rem); }
+    .card-icon  { font-size: clamp(2.2rem, 6vw, 4.2rem); line-height: 1; }
+    .card-label { font-size: clamp(0.8rem, 2.2vw, 1.25rem); font-weight: bold; color: #444; transition: color 0.4s; }
+    .card-check { font-size: clamp(3rem, 8vw, 5.5rem); line-height: 1; }
+    .card-star  { font-size: clamp(1rem, 2.5vw, 1.6rem); }
 
     body.night .card-label { color: #c0c0e0; }
 
@@ -512,6 +512,9 @@
     }
 
     /* ===== RESPONSIVE ===== */
+    @media (min-width: 700px) {
+      .grid { grid-template-columns: repeat(4, 1fr); }
+    }
     @media (max-width: 360px) {
       .grid { grid-template-columns: repeat(2, 1fr); }
     }
