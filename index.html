@@ -511,13 +511,7 @@
       box-shadow: 0 2px 8px rgba(255,90,135,0.35);
     }
 
-    /* ===== RESPONSIVE ===== */
-    @media (min-width: 700px) {
-      .grid { grid-template-columns: repeat(4, 1fr); }
-    }
-    @media (max-width: 360px) {
-      .grid { grid-template-columns: repeat(2, 1fr); }
-    }
+    /* grid columns are set dynamically by calcColumns() in JS */
   </style>
 </head>
 <body>
@@ -632,6 +626,25 @@
   let settingsBuffer     = {};
 
   // ── Helpers ──
+  function calcColumns(count) {
+    const w = window.innerWidth;
+    // portrait phone: <480px → max 2 cols
+    // tablet/landscape: ≥700px → max 4 cols
+    // in between: max 3 cols
+    const maxCols = w < 480 ? 2 : w >= 700 ? 4 : 3;
+    // Find the largest divisor of count within [1, maxCols] for symmetric layout
+    for (let c = maxCols; c >= 1; c--) {
+      if (count % c === 0) return c;
+    }
+    return 1;
+  }
+
+  function applyGridColumns() {
+    const count = MODES[currentMode].tasks.length;
+    document.getElementById('grid').style.gridTemplateColumns =
+      `repeat(${calcColumns(count)}, 1fr)`;
+  }
+
   function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -688,6 +701,7 @@
 
   function buildCards() {
     const mode = MODES[currentMode];
+    applyGridColumns();
     document.getElementById('grid').innerHTML = mode.tasks.map((task, i) => `
       <div class="card-wrap">
         <div class="card" id="card-${i}" onclick="flipCard(${i})">
@@ -825,6 +839,7 @@
   /* ============================================================
      INIT
   ============================================================ */
+  window.addEventListener('resize', applyGridColumns);
   loadFromStorage();
   buildCards();
 </script>
