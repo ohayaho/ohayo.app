@@ -6,6 +6,8 @@
   <title>ohayo.app</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
+  <script>window.va = window.va || function() { (window.vaq = window.vaq || []).push(arguments); };</script>
+  <script defer src="/_vercel/insights/script.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -575,9 +577,9 @@
     asa: {
       tasks: [
         { icon: '😴', label: 'ぱじゃまをぬぐ' },
-        { icon: '👕', label: 'ふくをきる' },
-        { icon: '🧦', label: 'くつしたをはく' },
-        { icon: '🍚', label: 'ごはんをたべる' },
+        { icon: '👕', label: 'きがえ' },
+        { icon: '🧦', label: 'くつした' },
+        { icon: '🍚', label: 'あさごはん' },
         { icon: '🪥', label: 'はみがき' },
         { icon: '🚽', label: 'といれ' },
       ],
@@ -696,6 +698,7 @@
   ============================================================ */
   function switchMode(mode) {
     if (mode === currentMode) return;
+    va('event', { name: 'mode_switch', data: { mode } });
     currentMode = mode;
     document.body.classList.toggle('night', mode === 'neru');
     setActiveTab('tab', mode);
@@ -728,12 +731,14 @@
     if (card.classList.contains('done')) return;
     card.classList.add('done');
     doneCount++;
+    va('event', { name: 'card_flip', data: { mode: currentMode, task: MODES[currentMode].tasks[i].label, count: doneCount } });
     if (doneCount === MODES[currentMode].tasks.length) {
       setTimeout(showCelebration, 700);
     }
   }
 
   function showCelebration() {
+    va('event', { name: 'celebration', data: { mode: currentMode } });
     const mode = MODES[currentMode];
     const el   = document.getElementById('celebration');
     el.className = `${mode.celebClass} show`;
@@ -826,6 +831,7 @@
     MODES.asa.tasks  = settingsBuffer.asa.map(t  => ({...t}));
     MODES.neru.tasks = settingsBuffer.neru.map(t => ({...t}));
     saveToStorage();
+    va('event', { name: 'settings_save' });
     doneCount = 0;
     clearCelebration();
     buildCards();
