@@ -6,8 +6,19 @@
   <title>ohayo.app</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
-  <script>window.va = window.va || function() { (window.vaq = window.vaq || []).push(arguments); };</script>
-  <script defer src="/_vercel/insights/script.js"></script>
+  <script>
+    // Vercel Analytics — web only. Disabled in the native app (file://) for
+    // App Store Kids Category compliance: no third-party analytics on device.
+    if (location.protocol === 'file:') {
+      window.va = function () {};
+    } else {
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+      var vaScript = document.createElement('script');
+      vaScript.defer = true;
+      vaScript.src = '/_vercel/insights/script.js';
+      document.head.appendChild(vaScript);
+    }
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
