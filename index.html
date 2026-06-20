@@ -711,6 +711,58 @@
   }
 
   /* ============================================================
+     FEEDBACK (haptics + sound)
+  ============================================================ */
+  // Haptics: native bridge in the iOS app, silent everywhere else.
+  function haptic(type) {
+    try {
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.haptic) {
+        window.webkit.messageHandlers.haptic.postMessage(type);
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  // Sound: synthesized with Web Audio — no asset files, works on web + app.
+  let audioCtx = null;
+  function audio() {
+    if (audioCtx === null) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      audioCtx = AC ? new AC() : false;
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx || null;
+  }
+
+  // One short tone with a soft attack/decay envelope (avoids clicks).
+  function tone(freq, start, dur, type, peak) {
+    const ctx = audio();
+    if (!ctx) return;
+    const t0   = ctx.currentTime + start;
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.linearRampToValueAtTime(peak || 0.18, t0 + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+
+  // Cheerful two-note "ding" when a card is completed.
+  function playDing() {
+    tone(660, 0,    0.18, 'triangle');  // E5
+    tone(990, 0.07, 0.22, 'triangle');  // B5
+  }
+
+  // Happy ascending arpeggio for the celebration.
+  function playFanfare() {
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => // C5 E5 G5 C6
+      tone(f, i * 0.12, 0.32, 'triangle', 0.2));
+  }
+
+  /* ============================================================
      MAIN SCREEN
   ============================================================ */
   function switchMode(mode) {
@@ -748,6 +800,8 @@
     if (card.classList.contains('done')) return;
     card.classList.add('done');
     doneCount++;
+    haptic('medium');
+    playDing();
     va('event', { name: 'card_flip', data: { mode: currentMode, task: MODES[currentMode].tasks[i].label, count: doneCount } });
     if (doneCount === MODES[currentMode].tasks.length) {
       setTimeout(showCelebration, 700);
@@ -755,6 +809,8 @@
   }
 
   function showCelebration() {
+    haptic('success');
+    playFanfare();
     va('event', { name: 'celebration', data: { mode: currentMode } });
     const mode = MODES[currentMode];
     const el   = document.getElementById('celebration');
