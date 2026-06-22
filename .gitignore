@@ -8,3 +8,7 @@
 # Xcode build output
 ios/build/
 DerivedData/
+
+# App Store Connect API private key (never commit)
+*.p8
+AuthKey_*.p8
