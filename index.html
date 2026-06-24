@@ -344,7 +344,7 @@
     }
 
     /* ===== SETTINGS PAGE ===== */
-    #settings-page {
+    .settings-panel {
       position: fixed;
       inset: 0;
       z-index: 400;
@@ -356,8 +356,10 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
+    /* sub-pages stack above the hub */
+    #settings-tasks, #settings-reward { z-index: 410; }
 
-    #settings-page.open {
+    .settings-panel.open {
       transform: translateX(0);
     }
 
@@ -412,6 +414,28 @@
     }
 
     .reset-btn:active { background: #f0f0f0; }
+
+    /* header spacer to keep the title centered */
+    .header-spacer { width: 64px; }
+
+    /* settings hub menu */
+    .menu-list { padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; }
+    .menu-row {
+      display: flex; align-items: center; gap: 14px;
+      width: 100%; text-align: left;
+      font-family: inherit; cursor: pointer;
+      background: white; border: none; border-radius: 14px;
+      padding: 18px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      touch-action: manipulation;
+    }
+    .menu-row:active { background: #f3f3f5; }
+    .menu-ic { font-size: 1.7rem; flex-shrink: 0; width: 36px; text-align: center; }
+    .menu-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .menu-tx b { color: #333; font-size: 1.02rem; }
+    .menu-tx small { color: #999; font-size: 0.78rem; margin-top: 2px; }
+    .menu-arrow { color: #ccc; font-size: 1.5rem; font-weight: bold; flex-shrink: 0; }
+    .menu-row.danger b { color: #e0607f; }
 
     /* settings mode tabs */
     .settings-tabs {
@@ -606,25 +630,38 @@
   <div class="celeb-sub">タップしてもどる</div>
 </div>
 
-<!-- ===== SETTINGS PAGE ===== -->
-<div id="settings-page">
+<!-- ===== SETTINGS — HUB ===== -->
+<div id="settings-page" class="settings-panel">
   <div class="settings-header">
-    <button class="back-btn"  onclick="closeSettings()">← もどる</button>
+    <button class="back-btn" onclick="closeSettings()">← もどる</button>
     <h2>⚙️ せってい</h2>
-    <button class="reset-btn" onclick="resetDefaults()">リセット</button>
+    <span class="header-spacer"></span>
   </div>
 
-  <div class="reward-section">
-    <div class="reward-title">ごほうび画像</div>
-    <div class="reward-desc">できたカードに表示されます（ぜんぶ共通）</div>
-    <div class="reward-frame" id="reward-frame">🎁</div>
-    <input type="range" id="reward-zoom" class="reward-zoom" min="1" max="3" step="0.01" value="1" oninput="onRewardZoom(this.value)">
-    <div class="reward-hint" id="reward-hint">ドラッグで位置、スライダーで大きさを調整</div>
-    <div class="reward-btns">
-      <button class="reward-btn" onclick="document.getElementById('reward-file').click()">画像をえらぶ</button>
-      <button class="reward-btn sub" id="reward-clear" onclick="clearRewardImage()">けす</button>
-    </div>
-    <input type="file" id="reward-file" accept="image/*" onchange="handleRewardImageFile(this)">
+  <div class="menu-list">
+    <button class="menu-row" onclick="openTasksPage()">
+      <span class="menu-ic">🃏</span>
+      <span class="menu-tx"><b>カードのへんしゅう</b><small>アイコン・なまえ</small></span>
+      <span class="menu-arrow">›</span>
+    </button>
+    <button class="menu-row" onclick="openRewardPage()">
+      <span class="menu-ic">🎁</span>
+      <span class="menu-tx"><b>ごほうび画像</b><small>できたカードに表示</small></span>
+      <span class="menu-arrow">›</span>
+    </button>
+    <button class="menu-row danger" onclick="resetDefaults()">
+      <span class="menu-ic">↩︎</span>
+      <span class="menu-tx"><b>カードをデフォルトにもどす</b></span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== SETTINGS — CARDS ===== -->
+<div id="settings-tasks" class="settings-panel">
+  <div class="settings-header">
+    <button class="back-btn" onclick="closeTasksPage()">← もどる</button>
+    <h2>🃏 カード</h2>
+    <span class="header-spacer"></span>
   </div>
 
   <div class="settings-tabs">
@@ -636,7 +673,30 @@
 
   <div class="settings-list" id="settings-list"></div>
 
-  <button class="save-btn" onclick="saveSettings()">💾 セーブ</button>
+  <button class="save-btn" onclick="saveTasks()">💾 セーブ</button>
+</div>
+
+<!-- ===== SETTINGS — REWARD IMAGE ===== -->
+<div id="settings-reward" class="settings-panel">
+  <div class="settings-header">
+    <button class="back-btn" onclick="closeRewardPage()">← もどる</button>
+    <h2>🎁 ごほうび画像</h2>
+    <span class="header-spacer"></span>
+  </div>
+
+  <div class="reward-section">
+    <div class="reward-desc">できたカードに表示されます（ぜんぶ共通）</div>
+    <div class="reward-frame" id="reward-frame">🎁</div>
+    <input type="range" id="reward-zoom" class="reward-zoom" min="1" max="3" step="0.01" value="1" oninput="onRewardZoom(this.value)">
+    <div class="reward-hint" id="reward-hint">ドラッグで位置、スライダーで大きさを調整</div>
+    <div class="reward-btns">
+      <button class="reward-btn" onclick="document.getElementById('reward-file').click()">画像をえらぶ</button>
+      <button class="reward-btn sub" id="reward-clear" onclick="clearRewardImage()">けす</button>
+    </div>
+    <input type="file" id="reward-file" accept="image/*" onchange="handleRewardImageFile(this)">
+  </div>
+
+  <button class="save-btn" onclick="saveReward()">💾 セーブ</button>
 </div>
 
 <script>
@@ -951,19 +1011,49 @@
   /* ============================================================
      SETTINGS
   ============================================================ */
-  function openSettings() {
-    // deep-copy current tasks into editing buffer
+  // ── hub ──
+  function openSettings()  { document.getElementById('settings-page').classList.add('open'); }
+  function closeSettings() { document.getElementById('settings-page').classList.remove('open'); }
+
+  // ── cards sub-page ──
+  function openTasksPage() {
     settingsBuffer = {
       asa:  MODES.asa.tasks.map(t  => ({...t})),
       neru: MODES.neru.tasks.map(t => ({...t})),
     };
     currentSettingsTab = currentMode;
-    settingsRewardCfg = rewardCfg ? { ...rewardCfg } : null;
-    sizeRewardFrame();
-    updateRewardEditor();
     updateSettingsTabs();
     buildSettingsForm();
-    document.getElementById('settings-page').classList.add('open');
+    document.getElementById('settings-tasks').classList.add('open');
+  }
+  function closeTasksPage() { document.getElementById('settings-tasks').classList.remove('open'); }
+
+  function saveTasks() {
+    collectFormToBuffer();
+    MODES.asa.tasks  = settingsBuffer.asa.map(t  => ({...t}));
+    MODES.neru.tasks = settingsBuffer.neru.map(t => ({...t}));
+    saveToStorage();
+    va('event', { name: 'settings_save' });
+    doneCount = 0;
+    clearCelebration();
+    buildCards();
+    closeTasksPage();
+  }
+
+  // ── reward image sub-page ──
+  function openRewardPage() {
+    settingsRewardCfg = rewardCfg ? { ...rewardCfg } : null;
+    document.getElementById('settings-reward').classList.add('open');
+    sizeRewardFrame();
+    updateRewardEditor();
+  }
+  function closeRewardPage() { document.getElementById('settings-reward').classList.remove('open'); }
+
+  function saveReward() {
+    rewardCfg = settingsRewardCfg ? { ...settingsRewardCfg } : null;
+    saveToStorage();
+    buildCards();
+    closeRewardPage();
   }
 
   /* ── reward image editor (drag to pan, slider to zoom) ── */
@@ -1062,10 +1152,6 @@
     frame.addEventListener('pointercancel', end);
   })();
 
-  function closeSettings() {
-    document.getElementById('settings-page').classList.remove('open');
-  }
-
   function switchSettingsTab(mode) {
     if (mode === currentSettingsTab) return;
     collectFormToBuffer();      // 現在のフォームをバッファに保存
@@ -1098,30 +1184,15 @@
     }));
   }
 
-  function saveSettings() {
-    collectFormToBuffer();
-    // バッファを MODES に反映
-    MODES.asa.tasks  = settingsBuffer.asa.map(t  => ({...t}));
-    MODES.neru.tasks = settingsBuffer.neru.map(t => ({...t}));
-    rewardCfg = settingsRewardCfg ? { ...settingsRewardCfg } : null;
+  function resetDefaults() {
+    if (!confirm('カードをデフォルトにもどしますか？')) return;
+    MODES.asa.tasks  = DEFAULT_MODES.asa.tasks.map(t  => ({...t}));
+    MODES.neru.tasks = DEFAULT_MODES.neru.tasks.map(t => ({...t}));
     saveToStorage();
-    va('event', { name: 'settings_save' });
+    va('event', { name: 'settings_reset' });
     doneCount = 0;
     clearCelebration();
     buildCards();
-    closeSettings();
-  }
-
-  function resetDefaults() {
-    if (!confirm('ぜんぶデフォルトにもどしますか？')) return;
-    settingsBuffer = {
-      asa:  DEFAULT_MODES.asa.tasks.map(t  => ({...t})),
-      neru: DEFAULT_MODES.neru.tasks.map(t => ({...t})),
-    };
-    settingsRewardCfg = null;
-    document.getElementById('reward-zoom').value = 1;
-    updateRewardEditor();
-    buildSettingsForm();
   }
 
   /* ============================================================
