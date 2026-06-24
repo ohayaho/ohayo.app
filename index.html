@@ -645,8 +645,13 @@
       <span class="menu-arrow">›</span>
     </button>
     <button class="menu-row" onclick="openRewardPage()">
-      <span class="menu-ic">🎁</span>
-      <span class="menu-tx"><b>ごほうび画像</b><small>できたカードに表示</small></span>
+      <span class="menu-ic">🖼️</span>
+      <span class="menu-tx"><b>カードのうら</b><small>できたカード1まいごとに表示</small></span>
+      <span class="menu-arrow">›</span>
+    </button>
+    <button class="menu-row" onclick="openClearPage()">
+      <span class="menu-ic">🎉</span>
+      <span class="menu-tx"><b>クリア</b><small>ぜんぶできたときに表示</small></span>
       <span class="menu-arrow">›</span>
     </button>
     <button class="menu-row danger" onclick="resetDefaults()">
@@ -676,27 +681,50 @@
   <button class="save-btn" onclick="saveTasks()">💾 セーブ</button>
 </div>
 
-<!-- ===== SETTINGS — REWARD IMAGE ===== -->
+<!-- ===== SETTINGS — カードのうら ===== -->
 <div id="settings-reward" class="settings-panel">
   <div class="settings-header">
     <button class="back-btn" onclick="closeRewardPage()">← もどる</button>
-    <h2>🎁 ごほうび画像</h2>
+    <h2>🖼️ カードのうら</h2>
     <span class="header-spacer"></span>
   </div>
 
   <div class="reward-section">
-    <div class="reward-desc">できたカードに表示されます（ぜんぶ共通）</div>
-    <div class="reward-frame" id="reward-frame">🎁</div>
-    <input type="range" id="reward-zoom" class="reward-zoom" min="1" max="3" step="0.01" value="1" oninput="onRewardZoom(this.value)">
+    <div class="reward-desc">できたカード1まいごとに表示されます（ぜんぶ共通）</div>
+    <div class="reward-frame" id="reward-frame">🖼️</div>
+    <input type="range" id="reward-zoom" class="reward-zoom" min="1" max="3" step="0.01" value="1" oninput="edZoom(ED_REWARD, this.value)">
     <div class="reward-hint" id="reward-hint">ドラッグで位置、スライダーで大きさを調整</div>
     <div class="reward-btns">
       <button class="reward-btn" onclick="document.getElementById('reward-file').click()">画像をえらぶ</button>
-      <button class="reward-btn sub" id="reward-clear" onclick="clearRewardImage()">けす</button>
+      <button class="reward-btn sub" id="reward-clear" onclick="edClear(ED_REWARD)">けす</button>
     </div>
-    <input type="file" id="reward-file" accept="image/*" onchange="handleRewardImageFile(this)">
+    <input type="file" id="reward-file" accept="image/*" onchange="edHandleFile(ED_REWARD, this)">
   </div>
 
   <button class="save-btn" onclick="saveReward()">💾 セーブ</button>
+</div>
+
+<!-- ===== SETTINGS — クリア ===== -->
+<div id="settings-clear" class="settings-panel">
+  <div class="settings-header">
+    <button class="back-btn" onclick="closeClearPage()">← もどる</button>
+    <h2>🎉 クリア</h2>
+    <span class="header-spacer"></span>
+  </div>
+
+  <div class="reward-section">
+    <div class="reward-desc">ぜんぶできたときの画面いっぱいに表示されます</div>
+    <div class="reward-frame" id="clear-frame">🎉</div>
+    <input type="range" id="clear-zoom" class="reward-zoom" min="1" max="3" step="0.01" value="1" oninput="edZoom(ED_CLEAR, this.value)">
+    <div class="reward-hint" id="clear-hint">ドラッグで位置、スライダーで大きさを調整</div>
+    <div class="reward-btns">
+      <button class="reward-btn" onclick="document.getElementById('clear-file').click()">画像をえらぶ</button>
+      <button class="reward-btn sub" id="clear-clear" onclick="edClear(ED_CLEAR)">けす</button>
+    </div>
+    <input type="file" id="clear-file" accept="image/*" onchange="edHandleFile(ED_CLEAR, this)">
+  </div>
+
+  <button class="save-btn" onclick="saveClear()">💾 セーブ</button>
 </div>
 
 <script>
@@ -761,36 +789,45 @@
   let doneCount          = 0;
   let currentSettingsTab = 'asa';
   let settingsBuffer     = {};
-  // Reward image config: { img:dataURL, posX, posY, zoom, nw, nh } | null
-  let rewardCfg         = null;  // applied to completed cards
-  let settingsRewardCfg = null;  // editing buffer
+  // Image config: { img:dataURL, posX, posY, zoom, nw, nh } | null
+  let rewardCfg         = null;  // shown on completed card backs ("カードのうら")
+  let settingsRewardCfg = null;
+  let clearCfg          = null;  // shown on the celebration screen ("クリア")
+  let settingsClearCfg  = null;
 
-  // Returns the reward config for card i. Currently global; will become
+  // Returns the card-back image for card i. Currently global; will become
   // per-card later (just return a per-index value when that ships).
   function getRewardCfg(i) { return rewardCfg; }
 
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   // Parse stored value (JSON config, or a legacy bare dataURL string).
-  function parseRewardCfg(raw) {
+  function parseImgCfg(raw) {
     if (!raw) return null;
     if (raw[0] === '{') { try { return JSON.parse(raw); } catch (e) { return null; } }
     if (raw.startsWith('data:')) return { img: raw, posX: 50, posY: 50, zoom: 1, nw: 0, nh: 0 };
     return null;
   }
 
-  // Apply a reward config as a background on an element of size CW×CH.
+  // Apply an image config as a background on an element of size CW×CH.
   // Pan via background-position(%), zoom via background-size(px) computed
-  // from the cover baseline, so it never leaves a gap.
-  function applyRewardBg(el, cfg, CW, CH) {
-    el.style.backgroundImage = `url('${cfg.img}')`;
-    el.style.backgroundRepeat = 'no-repeat';
-    el.style.backgroundPosition = `${cfg.posX}% ${cfg.posY}%`;
+  // from the cover baseline, so it never leaves a gap. With scrim=true a
+  // dark gradient is layered on top so overlaid text stays readable.
+  function applyImgBg(el, cfg, CW, CH, scrim) {
+    let size = 'cover', pos = `${cfg.posX}% ${cfg.posY}%`;
     if (cfg.nw && cfg.nh && CW && CH) {
       const cover = Math.max(CW / cfg.nw, CH / cfg.nh);
-      el.style.backgroundSize = `${cfg.nw * cover * cfg.zoom}px ${cfg.nh * cover * cfg.zoom}px`;
+      size = `${cfg.nw * cover * cfg.zoom}px ${cfg.nh * cover * cfg.zoom}px`;
+    }
+    el.style.backgroundRepeat = scrim ? 'no-repeat, no-repeat' : 'no-repeat';
+    if (scrim) {
+      el.style.backgroundImage    = `linear-gradient(rgba(0,0,0,.32), rgba(0,0,0,.5)), url('${cfg.img}')`;
+      el.style.backgroundSize     = `cover, ${size}`;
+      el.style.backgroundPosition = `center, ${pos}`;
     } else {
-      el.style.backgroundSize = 'cover';
+      el.style.backgroundImage    = `url('${cfg.img}')`;
+      el.style.backgroundSize     = size;
+      el.style.backgroundPosition = pos;
     }
   }
 
@@ -831,7 +868,8 @@
   ============================================================ */
   function loadFromStorage() {
     try {
-      rewardCfg = parseRewardCfg(localStorage.getItem('shitaku_reward_image'));
+      rewardCfg = parseImgCfg(localStorage.getItem('shitaku_reward_image'));
+      clearCfg  = parseImgCfg(localStorage.getItem('shitaku_clear_image'));
       const saved = localStorage.getItem('shitaku_custom_tasks');
       if (!saved) return;
       const data = JSON.parse(saved);
@@ -855,6 +893,8 @@
       }));
       if (rewardCfg) localStorage.setItem('shitaku_reward_image', JSON.stringify(rewardCfg));
       else           localStorage.removeItem('shitaku_reward_image');
+      if (clearCfg)  localStorage.setItem('shitaku_clear_image', JSON.stringify(clearCfg));
+      else           localStorage.removeItem('shitaku_clear_image');
     } catch(e) { /* ignore */ }
   }
 
@@ -952,7 +992,7 @@
       const cfg = getRewardCfg(+el.dataset.back);
       if (!cfg) return;
       const r = el.getBoundingClientRect();
-      applyRewardBg(el, cfg, r.width, r.height);
+      applyImgBg(el, cfg, r.width, r.height);
     });
   }
 
@@ -976,6 +1016,14 @@
     const mode = MODES[currentMode];
     const el   = document.getElementById('celebration');
     el.className = `${mode.celebClass} show`;
+    // custom "クリア" image as a full-screen backdrop (with a scrim for text)
+    if (clearCfg) {
+      applyImgBg(el, clearCfg, el.clientWidth, el.clientHeight, true);
+    } else {
+      el.style.backgroundImage = '';
+      el.style.backgroundSize = '';
+      el.style.backgroundPosition = '';
+    }
     document.getElementById('celeb-text').textContent      = mode.celebText;
     document.getElementById('celeb-emoji-top').textContent = mode.celebTop;
     document.getElementById('celeb-emoji-bot').textContent = mode.celebBot;
@@ -1040,54 +1088,50 @@
     closeTasksPage();
   }
 
-  // ── reward image sub-page ──
-  function openRewardPage() {
-    settingsRewardCfg = rewardCfg ? { ...rewardCfg } : null;
-    document.getElementById('settings-reward').classList.add('open');
-    sizeRewardFrame();
-    updateRewardEditor();
-  }
-  function closeRewardPage() { document.getElementById('settings-reward').classList.remove('open'); }
+  /* ── shared image editor (drag to pan, slider to zoom) ── */
+  // Each context binds the editor to one image config + its DOM ids.
+  const ED_REWARD = {
+    frameId: 'reward-frame', zoomId: 'reward-zoom', hintId: 'reward-hint', clearId: 'reward-clear',
+    placeholder: '🖼️',
+    aspect: () => { const c = document.querySelector('#grid .card-wrap'); if (c) { const r = c.getBoundingClientRect(); if (r.height) return r.width / r.height; } return 0.86; },
+    get: () => settingsRewardCfg, set: (v) => { settingsRewardCfg = v; },
+  };
+  const ED_CLEAR = {
+    frameId: 'clear-frame', zoomId: 'clear-zoom', hintId: 'clear-hint', clearId: 'clear-clear',
+    placeholder: '🎉',
+    aspect: () => (window.innerWidth / window.innerHeight) || 0.46,
+    get: () => settingsClearCfg, set: (v) => { settingsClearCfg = v; },
+  };
 
-  function saveReward() {
-    rewardCfg = settingsRewardCfg ? { ...settingsRewardCfg } : null;
-    saveToStorage();
-    buildCards();
-    closeRewardPage();
-  }
-
-  /* ── reward image editor (drag to pan, slider to zoom) ── */
-  // Match the editor frame's aspect ratio to the cards for a true preview.
-  function sizeRewardFrame() {
-    const frame = document.getElementById('reward-frame');
-    const card  = document.querySelector('#grid .card-wrap');
-    const h = 180;
-    let asp = 0.86;
-    if (card) { const r = card.getBoundingClientRect(); if (r.height) asp = r.width / r.height; }
+  // Match the editor frame's aspect ratio to where the image will show.
+  function edSizeFrame(ctx) {
+    const frame = document.getElementById(ctx.frameId);
+    const h = 190;
     frame.style.height = h + 'px';
-    frame.style.width  = Math.round(h * asp) + 'px';
+    frame.style.width  = Math.round(h * ctx.aspect()) + 'px';
   }
 
-  function updateRewardEditor() {
-    const frame = document.getElementById('reward-frame');
-    const zoom  = document.getElementById('reward-zoom');
-    const hint  = document.getElementById('reward-hint');
-    const clr   = document.getElementById('reward-clear');
-    if (settingsRewardCfg) {
+  function edUpdate(ctx) {
+    const frame = document.getElementById(ctx.frameId);
+    const zoom  = document.getElementById(ctx.zoomId);
+    const hint  = document.getElementById(ctx.hintId);
+    const clr   = document.getElementById(ctx.clearId);
+    const cfg   = ctx.get();
+    if (cfg) {
       frame.classList.add('set');
       frame.textContent = '';
-      applyRewardBg(frame, settingsRewardCfg, frame.clientWidth, frame.clientHeight);
-      zoom.value = settingsRewardCfg.zoom;
+      applyImgBg(frame, cfg, frame.clientWidth, frame.clientHeight);
+      zoom.value = cfg.zoom;
       zoom.style.display = ''; hint.style.display = ''; clr.style.display = '';
     } else {
       frame.classList.remove('set');
-      frame.textContent = '🎁';
+      frame.textContent = ctx.placeholder;
       frame.style.backgroundImage = '';
       zoom.style.display = 'none'; hint.style.display = 'none'; clr.style.display = 'none';
     }
   }
 
-  function handleRewardImageFile(input) {
+  function edHandleFile(ctx, input) {
     const file = input.files && input.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -1101,11 +1145,8 @@
         const canvas = document.createElement('canvas');
         canvas.width = width; canvas.height = height;
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        settingsRewardCfg = {
-          img: canvas.toDataURL('image/jpeg', 0.82),
-          posX: 50, posY: 50, zoom: 1, nw: width, nh: height,
-        };
-        updateRewardEditor();
+        ctx.set({ img: canvas.toDataURL('image/jpeg', 0.82), posX: 50, posY: 50, zoom: 1, nw: width, nh: height });
+        edUpdate(ctx);
       };
       img.src = e.target.result;
     };
@@ -1113,31 +1154,31 @@
     input.value = '';  // allow re-selecting the same file
   }
 
-  function onRewardZoom(v) {
-    if (!settingsRewardCfg) return;
-    settingsRewardCfg.zoom = parseFloat(v);
-    const frame = document.getElementById('reward-frame');
-    applyRewardBg(frame, settingsRewardCfg, frame.clientWidth, frame.clientHeight);
+  function edZoom(ctx, v) {
+    const cfg = ctx.get();
+    if (!cfg) return;
+    cfg.zoom = parseFloat(v);
+    const frame = document.getElementById(ctx.frameId);
+    applyImgBg(frame, cfg, frame.clientWidth, frame.clientHeight);
   }
 
-  function clearRewardImage() {
-    settingsRewardCfg = null;
-    document.getElementById('reward-zoom').value = 1;
-    updateRewardEditor();
+  function edClear(ctx) {
+    ctx.set(null);
+    document.getElementById(ctx.zoomId).value = 1;
+    edUpdate(ctx);
   }
 
-  // Drag the editor frame to pan the image (pointer = touch + mouse).
-  (function () {
-    const frame = document.getElementById('reward-frame');
+  function edBindDrag(ctx) {
+    const frame = document.getElementById(ctx.frameId);
     let dragging = false, lastX = 0, lastY = 0;
     frame.addEventListener('pointerdown', (e) => {
-      if (!settingsRewardCfg) return;
+      if (!ctx.get()) return;
       dragging = true; lastX = e.clientX; lastY = e.clientY;
       frame.setPointerCapture(e.pointerId);
     });
     frame.addEventListener('pointermove', (e) => {
-      if (!dragging || !settingsRewardCfg) return;
-      const cfg = settingsRewardCfg;
+      const cfg = ctx.get();
+      if (!dragging || !cfg) return;
       const CW = frame.clientWidth, CH = frame.clientHeight;
       const cover = Math.max(CW / cfg.nw, CH / cfg.nh);
       const bw = cfg.nw * cover * cfg.zoom, bh = cfg.nh * cover * cfg.zoom;
@@ -1145,12 +1186,41 @@
       cfg.posX = clamp(cfg.posX - (e.clientX - lastX) / ovx * 100, 0, 100);
       cfg.posY = clamp(cfg.posY - (e.clientY - lastY) / ovy * 100, 0, 100);
       lastX = e.clientX; lastY = e.clientY;
-      applyRewardBg(frame, cfg, CW, CH);
+      applyImgBg(frame, cfg, CW, CH);
     });
     const end = (e) => { dragging = false; try { frame.releasePointerCapture(e.pointerId); } catch (x) {} };
     frame.addEventListener('pointerup', end);
     frame.addEventListener('pointercancel', end);
-  })();
+  }
+
+  // ── カードのうら sub-page ──
+  function openRewardPage() {
+    settingsRewardCfg = rewardCfg ? { ...rewardCfg } : null;
+    document.getElementById('settings-reward').classList.add('open');
+    edSizeFrame(ED_REWARD);
+    edUpdate(ED_REWARD);
+  }
+  function closeRewardPage() { document.getElementById('settings-reward').classList.remove('open'); }
+  function saveReward() {
+    rewardCfg = settingsRewardCfg ? { ...settingsRewardCfg } : null;
+    saveToStorage();
+    buildCards();
+    closeRewardPage();
+  }
+
+  // ── クリア sub-page ──
+  function openClearPage() {
+    settingsClearCfg = clearCfg ? { ...clearCfg } : null;
+    document.getElementById('settings-clear').classList.add('open');
+    edSizeFrame(ED_CLEAR);
+    edUpdate(ED_CLEAR);
+  }
+  function closeClearPage() { document.getElementById('settings-clear').classList.remove('open'); }
+  function saveClear() {
+    clearCfg = settingsClearCfg ? { ...settingsClearCfg } : null;
+    saveToStorage();
+    closeClearPage();
+  }
 
   function switchSettingsTab(mode) {
     if (mode === currentSettingsTab) return;
@@ -1199,6 +1269,8 @@
      INIT
   ============================================================ */
   window.addEventListener('resize', () => { applyGridColumns(); applyRewardSizing(); });
+  edBindDrag(ED_REWARD);
+  edBindDrag(ED_CLEAR);
   loadFromStorage();
   buildCards();
 </script>
