@@ -571,7 +571,7 @@
     }
     .reward-btn.sub { background: #eee; color: #888; }
     .reward-btn:active { transform: scale(0.97); }
-    #reward-file { display: none; }
+    .reward-section input[type="file"] { display: none; }
 
     .save-btn {
       font-family: inherit;
@@ -651,7 +651,7 @@
     </button>
     <button class="menu-row" onclick="openClearPage()">
       <span class="menu-ic">🎉</span>
-      <span class="menu-tx"><b>クリア</b><small>ぜんぶできたときに表示</small></span>
+      <span class="menu-tx"><b>クリア画像</b><small>ぜんぶできたときに表示</small></span>
       <span class="menu-arrow">›</span>
     </button>
     <button class="menu-row danger" onclick="resetDefaults()">
@@ -708,7 +708,7 @@
 <div id="settings-clear" class="settings-panel">
   <div class="settings-header">
     <button class="back-btn" onclick="closeClearPage()">← もどる</button>
-    <h2>🎉 クリア</h2>
+    <h2>🎉 クリア画像</h2>
     <span class="header-spacer"></span>
   </div>
 
