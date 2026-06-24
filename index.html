@@ -245,6 +245,14 @@
     .card-check { font-size: clamp(3rem, 8vw, 5.5rem); line-height: 1; }
     .card-star  { font-size: clamp(1rem, 2.5vw, 1.6rem); }
 
+    /* reward image on the card back (when set in settings) */
+    .card-back.has-img { background-size: cover; background-position: center; }
+    .card-back.has-img .card-check { display: none; }
+    .card-back.has-img .card-star {
+      position: absolute; top: 8px; right: 10px;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+    }
+
     body.night .card-label { color: #c0c0e0; }
 
     /* ===== CELEBRATION ===== */
@@ -509,6 +517,36 @@
 
     .label-input:focus { border-color: #ff5a87; }
 
+    /* reward image section in settings */
+    .reward-section {
+      display: flex; align-items: center; gap: 14px;
+      margin: 0 14px 14px; padding: 14px;
+      background: white; border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    .reward-preview {
+      width: 72px; height: 72px; border-radius: 12px; flex-shrink: 0;
+      background: #f3f3f5 center/cover no-repeat;
+      border: 2px dashed #ddd;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.9rem; color: #ccc;
+    }
+    .reward-preview.set { border-style: solid; border-color: #ffd54f; }
+    .reward-preview.set::after { content: ''; }
+    .reward-info { flex: 1; min-width: 0; }
+    .reward-title { font-weight: bold; color: #444; font-size: 0.98rem; }
+    .reward-desc  { color: #999; font-size: 0.78rem; margin-top: 2px; }
+    .reward-btns  { display: flex; gap: 8px; margin-top: 9px; }
+    .reward-btn {
+      font-family: inherit; font-size: 0.85rem; font-weight: bold;
+      padding: 8px 14px; border: none; border-radius: 10px;
+      background: #ff5a87; color: #fff; cursor: pointer;
+      touch-action: manipulation;
+    }
+    .reward-btn.sub { background: #eee; color: #888; }
+    .reward-btn:active { transform: scale(0.97); }
+    #reward-file { display: none; }
+
     .save-btn {
       font-family: inherit;
       font-size: 1.2rem;
@@ -572,6 +610,19 @@
     <button class="back-btn"  onclick="closeSettings()">← もどる</button>
     <h2>⚙️ せってい</h2>
     <button class="reset-btn" onclick="resetDefaults()">リセット</button>
+  </div>
+
+  <div class="reward-section">
+    <div class="reward-preview" id="reward-preview">🎁</div>
+    <div class="reward-info">
+      <div class="reward-title">ごほうび画像</div>
+      <div class="reward-desc">できたカードに表示されます（ぜんぶ共通）</div>
+      <div class="reward-btns">
+        <button class="reward-btn" onclick="document.getElementById('reward-file').click()">画像をえらぶ</button>
+        <button class="reward-btn sub" id="reward-clear" onclick="clearRewardImage()">けす</button>
+      </div>
+    </div>
+    <input type="file" id="reward-file" accept="image/*" onchange="handleRewardImageFile(this)">
   </div>
 
   <div class="settings-tabs">
@@ -648,6 +699,12 @@
   let doneCount          = 0;
   let currentSettingsTab = 'asa';
   let settingsBuffer     = {};
+  let rewardImage        = '';   // dataURL shown on completed cards ('' = default face)
+  let settingsRewardImage = '';  // editing buffer for the reward image
+
+  // Returns the reward image for card i. Currently global; will become
+  // per-card later (just return a per-index value when that ships).
+  function getRewardImage(i) { return rewardImage; }
 
   // ── Helpers ──
   function calcColumns(count) {
@@ -686,6 +743,7 @@
   ============================================================ */
   function loadFromStorage() {
     try {
+      rewardImage = localStorage.getItem('shitaku_reward_image') || '';
       const saved = localStorage.getItem('shitaku_custom_tasks');
       if (!saved) return;
       const data = JSON.parse(saved);
@@ -707,6 +765,8 @@
         asa:  MODES.asa.tasks,
         neru: MODES.neru.tasks,
       }));
+      if (rewardImage) localStorage.setItem('shitaku_reward_image', rewardImage);
+      else             localStorage.removeItem('shitaku_reward_image');
     } catch(e) { /* ignore */ }
   }
 
@@ -779,20 +839,23 @@
   function buildCards() {
     const mode = MODES[currentMode];
     applyGridColumns();
-    document.getElementById('grid').innerHTML = mode.tasks.map((task, i) => `
+    document.getElementById('grid').innerHTML = mode.tasks.map((task, i) => {
+      const img = getRewardImage(i);
+      const backAttr = img ? ` class="card-back has-img" style="background-image:url('${img}')"` : ' class="card-back"';
+      return `
       <div class="card-wrap">
         <div class="card" id="card-${i}" onclick="flipCard(${i})">
           <div class="card-front">
             <div class="card-icon">${esc(task.icon)}</div>
             <div class="card-label">${esc(task.label)}</div>
           </div>
-          <div class="card-back">
+          <div${backAttr}>
             <div class="card-check">${mode.check}</div>
             <div class="card-star">${mode.star}</div>
           </div>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   function flipCard(i) {
@@ -857,9 +920,55 @@
       neru: MODES.neru.tasks.map(t => ({...t})),
     };
     currentSettingsTab = currentMode;
+    settingsRewardImage = rewardImage;
+    updateRewardPreview();
     updateSettingsTabs();
     buildSettingsForm();
     document.getElementById('settings-page').classList.add('open');
+  }
+
+  /* ── reward image ── */
+  function updateRewardPreview() {
+    const el = document.getElementById('reward-preview');
+    if (settingsRewardImage) {
+      el.style.backgroundImage = `url('${settingsRewardImage}')`;
+      el.classList.add('set');
+      el.textContent = '';
+      document.getElementById('reward-clear').style.display = '';
+    } else {
+      el.style.backgroundImage = '';
+      el.classList.remove('set');
+      el.textContent = '🎁';
+      document.getElementById('reward-clear').style.display = 'none';
+    }
+  }
+
+  function handleRewardImageFile(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 600;
+        let { width, height } = img;
+        if (width > height && width > max)      { height = Math.round(height * max / width); width = max; }
+        else if (height >= width && height > max) { width = Math.round(width * max / height); height = max; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        settingsRewardImage = canvas.toDataURL('image/jpeg', 0.82);
+        updateRewardPreview();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+    input.value = '';  // allow re-selecting the same file
+  }
+
+  function clearRewardImage() {
+    settingsRewardImage = '';
+    updateRewardPreview();
   }
 
   function closeSettings() {
@@ -903,6 +1012,7 @@
     // バッファを MODES に反映
     MODES.asa.tasks  = settingsBuffer.asa.map(t  => ({...t}));
     MODES.neru.tasks = settingsBuffer.neru.map(t => ({...t}));
+    rewardImage = settingsRewardImage;
     saveToStorage();
     va('event', { name: 'settings_save' });
     doneCount = 0;
@@ -917,6 +1027,8 @@
       asa:  DEFAULT_MODES.asa.tasks.map(t  => ({...t})),
       neru: DEFAULT_MODES.neru.tasks.map(t => ({...t})),
     };
+    settingsRewardImage = '';
+    updateRewardPreview();
     buildSettingsForm();
   }
 
