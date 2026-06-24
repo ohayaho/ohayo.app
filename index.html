@@ -519,27 +519,29 @@
 
     /* reward image section in settings */
     .reward-section {
-      display: flex; align-items: center; gap: 14px;
-      margin: 0 14px 14px; padding: 14px;
+      margin: 0 14px 14px; padding: 16px;
       background: white; border-radius: 14px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      display: flex; flex-direction: column; align-items: center;
     }
-    .reward-preview {
-      width: 72px; height: 72px; border-radius: 12px; flex-shrink: 0;
-      background: #f3f3f5 center/cover no-repeat;
-      border: 2px dashed #ddd;
+    .reward-title { font-weight: bold; color: #444; font-size: 0.98rem; align-self: flex-start; }
+    .reward-desc  { color: #999; font-size: 0.78rem; margin-top: 2px; align-self: flex-start; }
+    .reward-frame {
+      width: 150px; height: 180px; margin: 14px 0 4px;
+      border-radius: 14px; border: 2px dashed #ddd;
+      background: #f3f3f5 no-repeat;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.9rem; color: #ccc;
+      font-size: 2.4rem; color: #ccc; overflow: hidden;
+      touch-action: none; cursor: grab; user-select: none;
     }
-    .reward-preview.set { border-style: solid; border-color: #ffd54f; }
-    .reward-preview.set::after { content: ''; }
-    .reward-info { flex: 1; min-width: 0; }
-    .reward-title { font-weight: bold; color: #444; font-size: 0.98rem; }
-    .reward-desc  { color: #999; font-size: 0.78rem; margin-top: 2px; }
-    .reward-btns  { display: flex; gap: 8px; margin-top: 9px; }
+    .reward-frame.set { border-style: solid; border-color: #ffd54f; cursor: grab; }
+    .reward-frame.set:active { cursor: grabbing; }
+    .reward-zoom { width: 80%; margin: 10px 0 2px; accent-color: #ff5a87; }
+    .reward-hint { color: #bbb; font-size: 0.74rem; margin-bottom: 10px; }
+    .reward-btns  { display: flex; gap: 8px; }
     .reward-btn {
       font-family: inherit; font-size: 0.85rem; font-weight: bold;
-      padding: 8px 14px; border: none; border-radius: 10px;
+      padding: 8px 16px; border: none; border-radius: 10px;
       background: #ff5a87; color: #fff; cursor: pointer;
       touch-action: manipulation;
     }
@@ -613,14 +615,14 @@
   </div>
 
   <div class="reward-section">
-    <div class="reward-preview" id="reward-preview">🎁</div>
-    <div class="reward-info">
-      <div class="reward-title">ごほうび画像</div>
-      <div class="reward-desc">できたカードに表示されます（ぜんぶ共通）</div>
-      <div class="reward-btns">
-        <button class="reward-btn" onclick="document.getElementById('reward-file').click()">画像をえらぶ</button>
-        <button class="reward-btn sub" id="reward-clear" onclick="clearRewardImage()">けす</button>
-      </div>
+    <div class="reward-title">ごほうび画像</div>
+    <div class="reward-desc">できたカードに表示されます（ぜんぶ共通）</div>
+    <div class="reward-frame" id="reward-frame">🎁</div>
+    <input type="range" id="reward-zoom" class="reward-zoom" min="1" max="3" step="0.01" value="1" oninput="onRewardZoom(this.value)">
+    <div class="reward-hint" id="reward-hint">ドラッグで位置、スライダーで大きさを調整</div>
+    <div class="reward-btns">
+      <button class="reward-btn" onclick="document.getElementById('reward-file').click()">画像をえらぶ</button>
+      <button class="reward-btn sub" id="reward-clear" onclick="clearRewardImage()">けす</button>
     </div>
     <input type="file" id="reward-file" accept="image/*" onchange="handleRewardImageFile(this)">
   </div>
@@ -699,12 +701,38 @@
   let doneCount          = 0;
   let currentSettingsTab = 'asa';
   let settingsBuffer     = {};
-  let rewardImage        = '';   // dataURL shown on completed cards ('' = default face)
-  let settingsRewardImage = '';  // editing buffer for the reward image
+  // Reward image config: { img:dataURL, posX, posY, zoom, nw, nh } | null
+  let rewardCfg         = null;  // applied to completed cards
+  let settingsRewardCfg = null;  // editing buffer
 
-  // Returns the reward image for card i. Currently global; will become
+  // Returns the reward config for card i. Currently global; will become
   // per-card later (just return a per-index value when that ships).
-  function getRewardImage(i) { return rewardImage; }
+  function getRewardCfg(i) { return rewardCfg; }
+
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+  // Parse stored value (JSON config, or a legacy bare dataURL string).
+  function parseRewardCfg(raw) {
+    if (!raw) return null;
+    if (raw[0] === '{') { try { return JSON.parse(raw); } catch (e) { return null; } }
+    if (raw.startsWith('data:')) return { img: raw, posX: 50, posY: 50, zoom: 1, nw: 0, nh: 0 };
+    return null;
+  }
+
+  // Apply a reward config as a background on an element of size CW×CH.
+  // Pan via background-position(%), zoom via background-size(px) computed
+  // from the cover baseline, so it never leaves a gap.
+  function applyRewardBg(el, cfg, CW, CH) {
+    el.style.backgroundImage = `url('${cfg.img}')`;
+    el.style.backgroundRepeat = 'no-repeat';
+    el.style.backgroundPosition = `${cfg.posX}% ${cfg.posY}%`;
+    if (cfg.nw && cfg.nh && CW && CH) {
+      const cover = Math.max(CW / cfg.nw, CH / cfg.nh);
+      el.style.backgroundSize = `${cfg.nw * cover * cfg.zoom}px ${cfg.nh * cover * cfg.zoom}px`;
+    } else {
+      el.style.backgroundSize = 'cover';
+    }
+  }
 
   // ── Helpers ──
   function calcColumns(count) {
@@ -743,7 +771,7 @@
   ============================================================ */
   function loadFromStorage() {
     try {
-      rewardImage = localStorage.getItem('shitaku_reward_image') || '';
+      rewardCfg = parseRewardCfg(localStorage.getItem('shitaku_reward_image'));
       const saved = localStorage.getItem('shitaku_custom_tasks');
       if (!saved) return;
       const data = JSON.parse(saved);
@@ -765,8 +793,8 @@
         asa:  MODES.asa.tasks,
         neru: MODES.neru.tasks,
       }));
-      if (rewardImage) localStorage.setItem('shitaku_reward_image', rewardImage);
-      else             localStorage.removeItem('shitaku_reward_image');
+      if (rewardCfg) localStorage.setItem('shitaku_reward_image', JSON.stringify(rewardCfg));
+      else           localStorage.removeItem('shitaku_reward_image');
     } catch(e) { /* ignore */ }
   }
 
@@ -840,8 +868,7 @@
     const mode = MODES[currentMode];
     applyGridColumns();
     document.getElementById('grid').innerHTML = mode.tasks.map((task, i) => {
-      const img = getRewardImage(i);
-      const backAttr = img ? ` class="card-back has-img" style="background-image:url('${img}')"` : ' class="card-back"';
+      const hasImg = !!getRewardCfg(i);
       return `
       <div class="card-wrap">
         <div class="card" id="card-${i}" onclick="flipCard(${i})">
@@ -849,13 +876,24 @@
             <div class="card-icon">${esc(task.icon)}</div>
             <div class="card-label">${esc(task.label)}</div>
           </div>
-          <div${backAttr}>
+          <div class="card-back${hasImg ? ' has-img' : ''}" data-back="${i}">
             <div class="card-check">${mode.check}</div>
             <div class="card-star">${mode.star}</div>
           </div>
         </div>
       </div>`;
     }).join('');
+    applyRewardSizing();
+  }
+
+  // Apply each reward image to its card back at the card's current size.
+  function applyRewardSizing() {
+    document.querySelectorAll('#grid .card-back.has-img').forEach((el) => {
+      const cfg = getRewardCfg(+el.dataset.back);
+      if (!cfg) return;
+      const r = el.getBoundingClientRect();
+      applyRewardBg(el, cfg, r.width, r.height);
+    });
   }
 
   function flipCard(i) {
@@ -920,26 +958,42 @@
       neru: MODES.neru.tasks.map(t => ({...t})),
     };
     currentSettingsTab = currentMode;
-    settingsRewardImage = rewardImage;
-    updateRewardPreview();
+    settingsRewardCfg = rewardCfg ? { ...rewardCfg } : null;
+    sizeRewardFrame();
+    updateRewardEditor();
     updateSettingsTabs();
     buildSettingsForm();
     document.getElementById('settings-page').classList.add('open');
   }
 
-  /* ── reward image ── */
-  function updateRewardPreview() {
-    const el = document.getElementById('reward-preview');
-    if (settingsRewardImage) {
-      el.style.backgroundImage = `url('${settingsRewardImage}')`;
-      el.classList.add('set');
-      el.textContent = '';
-      document.getElementById('reward-clear').style.display = '';
+  /* ── reward image editor (drag to pan, slider to zoom) ── */
+  // Match the editor frame's aspect ratio to the cards for a true preview.
+  function sizeRewardFrame() {
+    const frame = document.getElementById('reward-frame');
+    const card  = document.querySelector('#grid .card-wrap');
+    const h = 180;
+    let asp = 0.86;
+    if (card) { const r = card.getBoundingClientRect(); if (r.height) asp = r.width / r.height; }
+    frame.style.height = h + 'px';
+    frame.style.width  = Math.round(h * asp) + 'px';
+  }
+
+  function updateRewardEditor() {
+    const frame = document.getElementById('reward-frame');
+    const zoom  = document.getElementById('reward-zoom');
+    const hint  = document.getElementById('reward-hint');
+    const clr   = document.getElementById('reward-clear');
+    if (settingsRewardCfg) {
+      frame.classList.add('set');
+      frame.textContent = '';
+      applyRewardBg(frame, settingsRewardCfg, frame.clientWidth, frame.clientHeight);
+      zoom.value = settingsRewardCfg.zoom;
+      zoom.style.display = ''; hint.style.display = ''; clr.style.display = '';
     } else {
-      el.style.backgroundImage = '';
-      el.classList.remove('set');
-      el.textContent = '🎁';
-      document.getElementById('reward-clear').style.display = 'none';
+      frame.classList.remove('set');
+      frame.textContent = '🎁';
+      frame.style.backgroundImage = '';
+      zoom.style.display = 'none'; hint.style.display = 'none'; clr.style.display = 'none';
     }
   }
 
@@ -952,13 +1006,16 @@
       img.onload = () => {
         const max = 600;
         let { width, height } = img;
-        if (width > height && width > max)      { height = Math.round(height * max / width); width = max; }
+        if (width > height && width > max)        { height = Math.round(height * max / width); width = max; }
         else if (height >= width && height > max) { width = Math.round(width * max / height); height = max; }
         const canvas = document.createElement('canvas');
         canvas.width = width; canvas.height = height;
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        settingsRewardImage = canvas.toDataURL('image/jpeg', 0.82);
-        updateRewardPreview();
+        settingsRewardCfg = {
+          img: canvas.toDataURL('image/jpeg', 0.82),
+          posX: 50, posY: 50, zoom: 1, nw: width, nh: height,
+        };
+        updateRewardEditor();
       };
       img.src = e.target.result;
     };
@@ -966,10 +1023,44 @@
     input.value = '';  // allow re-selecting the same file
   }
 
-  function clearRewardImage() {
-    settingsRewardImage = '';
-    updateRewardPreview();
+  function onRewardZoom(v) {
+    if (!settingsRewardCfg) return;
+    settingsRewardCfg.zoom = parseFloat(v);
+    const frame = document.getElementById('reward-frame');
+    applyRewardBg(frame, settingsRewardCfg, frame.clientWidth, frame.clientHeight);
   }
+
+  function clearRewardImage() {
+    settingsRewardCfg = null;
+    document.getElementById('reward-zoom').value = 1;
+    updateRewardEditor();
+  }
+
+  // Drag the editor frame to pan the image (pointer = touch + mouse).
+  (function () {
+    const frame = document.getElementById('reward-frame');
+    let dragging = false, lastX = 0, lastY = 0;
+    frame.addEventListener('pointerdown', (e) => {
+      if (!settingsRewardCfg) return;
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+      frame.setPointerCapture(e.pointerId);
+    });
+    frame.addEventListener('pointermove', (e) => {
+      if (!dragging || !settingsRewardCfg) return;
+      const cfg = settingsRewardCfg;
+      const CW = frame.clientWidth, CH = frame.clientHeight;
+      const cover = Math.max(CW / cfg.nw, CH / cfg.nh);
+      const bw = cfg.nw * cover * cfg.zoom, bh = cfg.nh * cover * cfg.zoom;
+      const ovx = Math.max(1, bw - CW), ovy = Math.max(1, bh - CH);
+      cfg.posX = clamp(cfg.posX - (e.clientX - lastX) / ovx * 100, 0, 100);
+      cfg.posY = clamp(cfg.posY - (e.clientY - lastY) / ovy * 100, 0, 100);
+      lastX = e.clientX; lastY = e.clientY;
+      applyRewardBg(frame, cfg, CW, CH);
+    });
+    const end = (e) => { dragging = false; try { frame.releasePointerCapture(e.pointerId); } catch (x) {} };
+    frame.addEventListener('pointerup', end);
+    frame.addEventListener('pointercancel', end);
+  })();
 
   function closeSettings() {
     document.getElementById('settings-page').classList.remove('open');
@@ -1012,7 +1103,7 @@
     // バッファを MODES に反映
     MODES.asa.tasks  = settingsBuffer.asa.map(t  => ({...t}));
     MODES.neru.tasks = settingsBuffer.neru.map(t => ({...t}));
-    rewardImage = settingsRewardImage;
+    rewardCfg = settingsRewardCfg ? { ...settingsRewardCfg } : null;
     saveToStorage();
     va('event', { name: 'settings_save' });
     doneCount = 0;
@@ -1027,15 +1118,16 @@
       asa:  DEFAULT_MODES.asa.tasks.map(t  => ({...t})),
       neru: DEFAULT_MODES.neru.tasks.map(t => ({...t})),
     };
-    settingsRewardImage = '';
-    updateRewardPreview();
+    settingsRewardCfg = null;
+    document.getElementById('reward-zoom').value = 1;
+    updateRewardEditor();
     buildSettingsForm();
   }
 
   /* ============================================================
      INIT
   ============================================================ */
-  window.addEventListener('resize', applyGridColumns);
+  window.addEventListener('resize', () => { applyGridColumns(); applyRewardSizing(); });
   loadFromStorage();
   buildCards();
 </script>
