@@ -70,6 +70,39 @@ body.night .done {{ background:linear-gradient(145deg,#2d1b69,#1a1a6e); border-b
 .celeb .txt {{ font-size:96px; font-weight:bold; color:#ff5a87; text-shadow:4px 6px 0 #fff; }}
 .celeb .sub {{ font-size:40px; color:#b9728a; }}
 .conf {{ position:absolute; width:26px; height:38px; border-radius:5px; }}
+/* photo on the card back (v1.1) */
+.photo {{ position:relative; width:100%; height:100%; border-radius:46px; overflow:hidden; }}
+.photo .subj {{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:188px; line-height:1; filter:drop-shadow(0 6px 10px rgba(0,0,0,.18)); }}
+.photo .star {{ position:absolute; top:20px; right:24px; font-size:54px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.35)); z-index:2; }}
+.sceneA {{ background:
+  radial-gradient(circle at 24% 28%, rgba(255,255,255,.55) 0 5%, transparent 6%),
+  radial-gradient(circle at 72% 18%, rgba(255,255,255,.4) 0 4%, transparent 5%),
+  radial-gradient(circle at 82% 62%, rgba(255,244,210,.6) 0 7%, transparent 8%),
+  radial-gradient(circle at 38% 78%, rgba(255,255,255,.35) 0 6%, transparent 7%),
+  linear-gradient(150deg,#ffd9a8 0%,#ff9fb6 58%,#c89cff 100%); }}
+.sceneB {{ background:
+  radial-gradient(circle at 28% 24%, rgba(255,255,255,.5) 0 5%, transparent 6%),
+  radial-gradient(circle at 76% 30%, rgba(255,255,255,.38) 0 4%, transparent 5%),
+  radial-gradient(circle at 66% 74%, rgba(255,255,255,.34) 0 7%, transparent 8%),
+  radial-gradient(circle at 30% 70%, rgba(220,255,210,.5) 0 6%, transparent 7%),
+  linear-gradient(150deg,#a6e3a1 0%,#74c7ec 60%,#89b4fa 100%); }}
+/* full-screen clear photo (v1.1) — a CSS sunset landscape standing in for the user's photo */
+.celeb.photobg {{ overflow:hidden; }}
+.celeb .photoback {{ position:absolute; inset:0; z-index:0; overflow:hidden;
+  background:linear-gradient(#37286b 0%,#7a3f86 26%,#e9744f 60%,#ffc987 100%); }}
+.celeb .photoback::after {{ content:''; position:absolute; inset:0; z-index:3;
+  background:linear-gradient(rgba(0,0,0,.26),rgba(0,0,0,.46)); }}
+.celeb .photoback .sun {{ position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
+  width:300px; height:300px; border-radius:50%;
+  background:radial-gradient(circle,#fff7e0 0%,#ffd884 52%,rgba(255,190,120,0) 72%); }}
+.celeb .photoback .hill {{ position:absolute; left:-6%; right:-6%; bottom:0; z-index:2;
+  border-radius:50% 50% 0 0 / 100% 100% 0 0; }}
+.celeb .photoback .hill.back {{ height:30%; background:#5a3a6e; }}
+.celeb .photoback .hill.front {{ height:20%; background:#2e2350; left:-12%; right:-12%; }}
+.celeb.photobg .big {{ position:relative; z-index:2; text-shadow:0 4px 14px rgba(0,0,0,.45); }}
+.celeb.photobg .txt {{ position:relative; color:#fff; text-shadow:0 4px 14px rgba(0,0,0,.5); z-index:2; }}
+.celeb.photobg .sub {{ position:relative; color:#fff; opacity:.9; z-index:2; }}
+.celeb.photobg .conf {{ z-index:2; }}
 </style></head><body class="{bodyclass}">{body}</body></html>
 """
 
@@ -85,6 +118,10 @@ def done(face, star):
 
 def task(cls, icon, label):
     return f'<div class="card {cls}"><div class="icon">{icon}</div><div class="label">{label}</div></div>'
+
+def photo_card(scene, subj, star):
+    return (f'<div class="card done"><div class="photo {scene}">'
+            f'<div class="subj">{subj}</div><div class="star">{star}</div></div></div>')
 
 # ---------- ASA ----------
 asa = STATUS.format(time="7:00") + """
@@ -147,11 +184,44 @@ celebration = STATUS.format(time="7:12") + """
 </div>
 """
 
+# ---------- CARD BACK PHOTO (v1.1) ----------
+cardback = STATUS.format(time="7:08") + """
+<div class="caption">できたカードに、おうちの写真</div>
+<div class="subcap">お気に入りの1枚で、もっとうれしい「できた！」</div>
+<div class="hero-main">できた　を　もっと自分ごとに</div>
+<div class="hero-sub">設定した写真は、端末のなかだけに保存されます</div>
+<div class="tabs"><div class="tab active">☀️ あさ</div><div class="tab">🌙 よる</div></div>
+""" + grid([
+    photo_card("sceneA", "🐱", "⭐"), photo_card("sceneB", "🐶", "⭐"),
+    task("c3","🧦","くつした"), task("c4","🍚","あさごはん"),
+    task("c5","🪥","はみがき"), task("c6","🚽","といれ"),
+])
+
+# ---------- CLEAR IMAGE (v1.1) ----------
+random.seed(11)
+conf2 = ''.join(
+    f'<div class="conf" style="left:{random.randint(0,100)}%; top:{random.randint(2,95)}%; '
+    f'background:{random.choice(colors)}; transform:rotate({random.randint(0,360)}deg);"></div>'
+    for _ in range(70))
+clearimg = STATUS.format(time="7:12") + """
+<div class="caption">クリア画面も、自分だけの1枚に</div>
+<div class="subcap">ぜんぶできたごほうびに、お気に入りの写真を。</div>
+<div class="celeb photobg">
+  <div class="photoback"><div class="sun"></div><div class="hill back"></div><div class="hill front"></div></div>
+""" + conf2 + """
+  <div class="big">🌟</div>
+  <div class="txt">がんばったね！</div>
+  <div class="sub">タップしてもどる</div>
+</div>
+"""
+
 out = {
     'ss-1-asa.html': BASE.format(bodyclass='', body=asa),
     'ss-2-yoru.html': BASE.format(bodyclass='night', body=yoru),
     'ss-3-settings.html': BASE.format(bodyclass='', body=settings),
     'ss-4-celebration.html': BASE.format(bodyclass='', body=celebration),
+    'ss-5-cardback.html': BASE.format(bodyclass='', body=cardback),
+    'ss-6-clearimage.html': BASE.format(bodyclass='', body=clearimg),
 }
 for name, html in out.items():
     with open('/tmp/' + name, 'w') as f:

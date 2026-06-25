@@ -101,7 +101,12 @@ ohayo（おはよう）は、子どもが「あさ」と「よる」のしたく
 
 ## スクリーンショット（6.9インチ / 1320×2868）
 
-`marketing/screenshots/` に4枚（あさ・よる・せってい・おいわい）。
-App Store Connect の「6.9インチディスプレイ」枠にアップロード。
+`marketing/screenshots/` に6枚：
+1. あさ　2. よる　3. せってい　4. おいわい
+5. カードのうら（写真表示・v1.1）　6. クリア画像（v1.1）
 
-再生成は `python3 marketing/generate-screenshots.py` → Microsoft Edge ヘッドレスでレンダリング。
+App Store Connect の「6.9インチディスプレイ」枠にアップロード（最大10枚）。
+
+再生成は `python3 marketing/generate-screenshots.py` で `/tmp` にHTMLを書き出し、
+Microsoft Edge ヘッドレスでPNG化（シミュレータのWKWebViewは絵文字が豆腐になるため）。
+v1.1の5・6枚目は実写を使わず、写真っぽいCSSシーンで「ここにおうちの写真が入る」を表現。
