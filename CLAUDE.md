@@ -1,6 +1,7 @@
-# ohayo.app
+# できた！
 
 子ども向けの朝・夜したくトラッカー。Vercelにデプロイ。
+（アプリ名は「できた！」。ドメインは `ohayo-app.com`、Bundle ID は `app.ohayo.ohayo` のまま）
 
 ## 構成
 - 単一ファイル (`index.html`) に HTML/CSS/JS をすべて埋め込み

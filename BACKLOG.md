@@ -1,4 +1,4 @@
-# ohayo.app バックログ
+# できた！ バックログ
 
 優先度と依存関係を整理したもの。上から着手候補順。
 
@@ -35,26 +35,16 @@
 - [ ] **タスク数の増減**（今は6固定 → 4〜8）
 - [ ] **タスクの並べ替え**（せっていでドラッグ）
 
-## 🏷️ アプリ名・プロジェクト名を正式名「できた！」に統一
-**目的**：申請中の正式名「できた！」に網羅的に統一（ドメインは諦める）
-
-正式名（`marketing/app-store-listing.md`）
-- App名：できた！イヤイヤ期の朝したくがサクサク進む
-- ホーム画面名（CFBundleDisplayName）：できた！
-
-統一が必要な箇所
-- [ ] `README.md` → `# DekitaButton`
-- [ ] `index.html` `<title>ohayo.app</title>`
-- [ ] `privacy.html` / `support.html` の本文・タイトル多数（ohayo.app）
-- [ ] `CLAUDE.md` / `BACKLOG.md` → `# ohayo.app`
+## ✅ アプリ名・ドキュメントを正式名「できた！」に統一（2026-06）
+公開・ドキュメント上の表記を正式名「できた！」へ統一（英語パートは "Dekita!"）。
+- README.md / CLAUDE.md / BACKLOG.md の見出し
+- index.html・privacy.html・support.html の `<title>`／本文
+- marketing/app-store-listing.md（見出し・概要本文）／generate-screenshots.py コメント
 
 対象外（変えない）
 - ドメイン `ohayo-app.com`、`support@ohayo-app.com`
 - リポジトリ名 `ohayaho/ohayo.app`
 - Bundle ID `app.ohayo.ohayo`、Xcode の `ohayoApp` / `ohayo.xcodeproj`（ビルドが壊れる）
-
-要相談ポイント
-- [ ] ブランド表記としての「ohayo.app」を「できた！」に置換するか（法務/ストアページ含む）
 
 ---
 

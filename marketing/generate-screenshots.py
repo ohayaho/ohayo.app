@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Generates 4 App Store screenshot HTML files (1320x2868) for ohayo.app.
+# Generates 6 App Store screenshot HTML files (1320x2868) for できた！.
 import os
 
 BASE = """
