@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Generates 6 App Store screenshot HTML files (1320x2868) for できた！.
 import os
+import math
 
 BASE = """
 <!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
@@ -72,6 +73,7 @@ body.night .done {{ background:linear-gradient(145deg,#2d1b69,#1a1a6e); border-b
 .conf {{ position:absolute; width:26px; height:38px; border-radius:5px; }}
 /* photo on the card back (v1.1) */
 .photo {{ position:relative; width:100%; height:100%; border-radius:46px; overflow:hidden; }}
+.photo svg {{ position:absolute; inset:0; width:100%; height:100%; display:block; }}
 .photo .subj {{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:188px; line-height:1; filter:drop-shadow(0 6px 10px rgba(0,0,0,.18)); }}
 .photo .star {{ position:absolute; top:20px; right:24px; font-size:54px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.35)); z-index:2; }}
 .sceneA {{ background:
@@ -122,6 +124,44 @@ def task(cls, icon, label):
 def photo_card(scene, subj, star):
     return (f'<div class="card done"><div class="photo {scene}">'
             f'<div class="subj">{subj}</div><div class="star">{star}</div></div></div>')
+
+def kid_drawing(body, ear, cheek, accent, paper, seed, extra=""):
+    """An ORIGINAL kawaii mascot in a child's crayon style (no real-world IP).
+    Stands in for a user-uploaded photo/drawing in the v1.1 card-back shot."""
+    fid = f"cr{seed}"
+    rays = "".join(
+        f'<line x1="58" y1="52" x2="{58+38*math.cos(a):.1f}" y2="{52+38*math.sin(a):.1f}"/>'
+        for a in [i*0.7854 for i in range(8)])
+    grass = 'M-10 300 Q 25 278 60 300 T 130 300 T 200 300 T 270 300 T 340 300 T 410 300'
+    return f'''<svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs><filter id="{fid}" x="-15%" y="-15%" width="130%" height="130%">
+<feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="3" seed="{seed}" result="n"/>
+<feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter></defs>
+<rect x="0" y="0" width="400" height="320" fill="{paper}"/>
+<g filter="url(#{fid})">
+  <g fill="none" stroke="#f0b93b" stroke-width="4" stroke-linecap="round">{rays}</g>
+  <circle cx="58" cy="52" r="22" fill="#ffe08a" stroke="#e8a92e" stroke-width="4"/>
+  <path d="{grass}" fill="none" stroke="#7cc04a" stroke-width="7" stroke-linecap="round"/>
+  <g stroke="{accent}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M152 118 L132 74 L182 108 Z" fill="{ear}"/>
+    <path d="M248 118 L268 74 L218 108 Z" fill="{ear}"/>
+    <ellipse cx="200" cy="188" rx="80" ry="84" fill="{body}"/>
+    <circle cx="171" cy="172" r="16" fill="#fff"/>
+    <circle cx="229" cy="172" r="16" fill="#fff"/>
+    <circle cx="173" cy="175" r="7.5" fill="{accent}" stroke="none"/>
+    <circle cx="231" cy="175" r="7.5" fill="{accent}" stroke="none"/>
+    <path d="M179 206 Q200 232 221 206" fill="none"/>
+    <path d="M120 198 Q100 206 96 226" fill="none"/>
+    <path d="M280 198 Q300 206 304 226" fill="none"/>
+    {extra}
+  </g>
+  <circle cx="156" cy="202" r="11" fill="{cheek}"/>
+  <circle cx="244" cy="202" r="11" fill="{cheek}"/>
+</g></svg>'''
+
+def kid_card(svg, star="⭐"):
+    return (f'<div class="card done"><div class="photo">{svg}'
+            f'<div class="star">{star}</div></div></div>')
 
 # ---------- ASA ----------
 asa = STATUS.format(time="7:00") + """
@@ -184,7 +224,11 @@ celebration = STATUS.format(time="7:12") + """
 </div>
 """
 
-# ---------- CARD BACK PHOTO (v1.1) ----------
+# ---------- CARD BACK IMAGE (v1.1) — lead screenshot ----------
+# Done cards show ORIGINAL child's-crayon mascots (stand-ins for a user's photo/drawing).
+kid_a = kid_drawing(body="#8fd9c4", ear="#8fd9c4", cheek="#ff9bb0", accent="#3a4a55", paper="#fdf3df", seed=4)
+kid_b = kid_drawing(body="#ffb27a", ear="#ffb27a", cheek="#ff7e8f", accent="#5a3a2a", paper="#eaf6ff", seed=9,
+                    extra='<path d="M200 200 q-12 -16 -24 -2 q-2 14 24 28 q26 -14 24 -28 q-12 -14 -24 2 Z" fill="#fff3c4"/>')
 cardback = STATUS.format(time="7:08") + """
 <div class="caption">できたカードに、おうちの写真</div>
 <div class="subcap">お気に入りの1枚で、もっとうれしい「できた！」</div>
@@ -192,7 +236,7 @@ cardback = STATUS.format(time="7:08") + """
 <div class="hero-sub">設定した写真は、端末のなかだけに保存されます</div>
 <div class="tabs"><div class="tab active">☀️ あさ</div><div class="tab">🌙 よる</div></div>
 """ + grid([
-    photo_card("sceneA", "🐱", "⭐"), photo_card("sceneB", "🐶", "⭐"),
+    kid_card(kid_a), kid_card(kid_b),
     task("c3","🧦","くつした"), task("c4","🍚","あさごはん"),
     task("c5","🪥","はみがき"), task("c6","🚽","といれ"),
 ])
@@ -215,13 +259,14 @@ clearimg = STATUS.format(time="7:12") + """
 </div>
 """
 
+# ss-1 is the card-back image shot (v1.1 headline); the plain あさ board
+# (`asa`, still defined above) was retired in favour of it.
 out = {
-    'ss-1-asa.html': BASE.format(bodyclass='', body=asa),
+    'ss-1-cardback.html': BASE.format(bodyclass='', body=cardback),
     'ss-2-yoru.html': BASE.format(bodyclass='night', body=yoru),
     'ss-3-settings.html': BASE.format(bodyclass='', body=settings),
     'ss-4-celebration.html': BASE.format(bodyclass='', body=celebration),
-    'ss-5-cardback.html': BASE.format(bodyclass='', body=cardback),
-    'ss-6-clearimage.html': BASE.format(bodyclass='', body=clearimg),
+    'ss-5-clearimage.html': BASE.format(bodyclass='', body=clearimg),
 }
 for name, html in out.items():
     with open('/tmp/' + name, 'w') as f:
