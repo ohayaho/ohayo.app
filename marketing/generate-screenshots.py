@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Generates 6 App Store screenshot HTML files (1320x2868) for できた！.
 import os
-import math
+import base64
 
 BASE = """
 <!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
@@ -10,7 +10,7 @@ html,body {{ width:1320px; height:2868px; overflow:hidden; }}
 body {{
   font-family:'Hiragino Maru Gothic ProN','BIZ UDPGothic',sans-serif;
   background: linear-gradient(160deg,#ffe0ec 0%,#fff5cc 50%,#d4f0ff 100%);
-  padding:0 70px; display:flex; flex-direction:column; align-items:center;
+  padding:96px 70px 0; display:flex; flex-direction:column; align-items:center;
 }}
 body.night {{ background: linear-gradient(160deg,#1a1a4e 0%,#2d1b69 50%,#0d2b4e 100%); }}
 /* status bar */
@@ -51,6 +51,7 @@ body.night .card .label {{ color:#c8c8ea; }}
 .done {{ background:linear-gradient(145deg,#fffde7,#fff59d); border-bottom:13px solid #ffd54f; }}
 body.night .done {{ background:linear-gradient(145deg,#2d1b69,#1a1a6e); border-bottom:13px solid #7c4dff; }}
 .done .face {{ font-size:190px; line-height:1; }} .done .star {{ font-size:54px; }}
+.card.mosaic {{ background-repeat:no-repeat; border-bottom:none; overflow:hidden; }}
 /* settings */
 .set-screen {{ width:100%; background:#f5f5f7; border-radius:50px; box-shadow:0 14px 40px rgba(0,0,0,.12); overflow:hidden; }}
 .set-head {{ display:flex; align-items:center; justify-content:space-between; padding:44px 50px; background:#fff; border-bottom:2px solid #e7e7ec; }}
@@ -88,8 +89,15 @@ body.night .done {{ background:linear-gradient(145deg,#2d1b69,#1a1a6e); border-b
   radial-gradient(circle at 66% 74%, rgba(255,255,255,.34) 0 7%, transparent 8%),
   radial-gradient(circle at 30% 70%, rgba(220,255,210,.5) 0 6%, transparent 7%),
   linear-gradient(150deg,#a6e3a1 0%,#74c7ec 60%,#89b4fa 100%); }}
-/* full-screen clear photo (v1.1) — a CSS sunset landscape standing in for the user's photo */
+/* photo shot (v1.1) — a real photo of a kid's drawing being snapped */
+.photoshot {{ width:100%; display:flex; flex-direction:column; align-items:center; }}
+.photoshot img {{ width:1000px; border-radius:56px; box-shadow:0 34px 70px rgba(0,0,0,.28); }}
+.photoshot .tag {{ margin-top:70px; font-size:46px; font-weight:bold; color:#3f8f5f;
+  background:rgba(255,255,255,.78); padding:30px 56px; border-radius:80px;
+  box-shadow:0 8px 22px rgba(0,0,0,.10); }}
+/* full-screen clear photo (v1.1) — the user's own picture fills the screen */
 .celeb.photobg {{ overflow:hidden; }}
+.celeb .photoback.shot {{ background-size:cover; background-position:center; }}
 .celeb .photoback {{ position:absolute; inset:0; z-index:0; overflow:hidden;
   background:linear-gradient(#37286b 0%,#7a3f86 26%,#e9744f 60%,#ffc987 100%); }}
 .celeb .photoback::after {{ content:''; position:absolute; inset:0; z-index:3;
@@ -108,9 +116,9 @@ body.night .done {{ background:linear-gradient(145deg,#2d1b69,#1a1a6e); border-b
 </style></head><body class="{bodyclass}">{body}</body></html>
 """
 
-STATUS = """<div class="status"><div class="time">{time}</div><div class="right">
-<svg class="wifi" width="56" height="40" viewBox="0 0 56 40"><path d="M28 8C17 8 7.6 12.6 1 19.7l5.2 5.4C11.8 19.3 19.4 15.6 28 15.6s16.2 3.7 21.8 9.5l5.2-5.4C48.4 12.6 39 8 28 8zm0 14c-5.5 0-10.4 2.4-13.8 6.1l5.4 5.6C21.4 31.5 24.5 30 28 30s6.6 1.5 8.4 3.7l5.4-5.6C38.4 24.4 33.5 22 28 22zm0 13.6l6.2-6.4c-1.6-1.7-3.8-2.6-6.2-2.6s-4.6.9-6.2 2.6L28 35.6z"/></svg>
-<div class="batt"><div class="fill"></div></div></div></div>"""
+# No fake status bar (time/wifi/battery). Each screen still calls
+# STATUS.format(time=...) for backwards-compat; an empty template yields "".
+STATUS = ""
 
 def grid(cards):
     return '<div class="grid">' + ''.join(cards) + '</div>'
@@ -121,47 +129,53 @@ def done(face, star):
 def task(cls, icon, label):
     return f'<div class="card {cls}"><div class="icon">{icon}</div><div class="label">{label}</div></div>'
 
-def photo_card(scene, subj, star):
-    return (f'<div class="card done"><div class="photo {scene}">'
-            f'<div class="subj">{subj}</div><div class="star">{star}</div></div></div>')
+# A real child's crayon drawing, used as the single picture that spans the whole
+# grid in the v1.1 card-back shot (アタック25-style mosaic — one image, six cards).
+_DINO_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'dino.jpg')
+_DINO_URI  = 'data:image/jpeg;base64,' + base64.b64encode(open(_DINO_PATH, 'rb').read()).decode()
+DINO_W, DINO_H = 644, 951
 
-def kid_drawing(body, ear, cheek, accent, paper, seed, extra=""):
-    """An ORIGINAL kawaii mascot in a child's crayon style (no real-world IP).
-    Stands in for a user-uploaded photo/drawing in the v1.1 card-back shot."""
-    fid = f"cr{seed}"
-    rays = "".join(
-        f'<line x1="58" y1="52" x2="{58+38*math.cos(a):.1f}" y2="{52+38*math.sin(a):.1f}"/>'
-        for a in [i*0.7854 for i in range(8)])
-    grass = 'M-10 300 Q 25 278 60 300 T 130 300 T 200 300 T 270 300 T 340 300 T 410 300'
-    return f'''<svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-<defs><filter id="{fid}" x="-15%" y="-15%" width="130%" height="130%">
-<feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="3" seed="{seed}" result="n"/>
-<feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter></defs>
-<rect x="0" y="0" width="400" height="320" fill="{paper}"/>
-<g filter="url(#{fid})">
-  <g fill="none" stroke="#f0b93b" stroke-width="4" stroke-linecap="round">{rays}</g>
-  <circle cx="58" cy="52" r="22" fill="#ffe08a" stroke="#e8a92e" stroke-width="4"/>
-  <path d="{grass}" fill="none" stroke="#7cc04a" stroke-width="7" stroke-linecap="round"/>
-  <g stroke="{accent}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M152 118 L132 74 L182 108 Z" fill="{ear}"/>
-    <path d="M248 118 L268 74 L218 108 Z" fill="{ear}"/>
-    <ellipse cx="200" cy="188" rx="80" ry="84" fill="{body}"/>
-    <circle cx="171" cy="172" r="16" fill="#fff"/>
-    <circle cx="229" cy="172" r="16" fill="#fff"/>
-    <circle cx="173" cy="175" r="7.5" fill="{accent}" stroke="none"/>
-    <circle cx="231" cy="175" r="7.5" fill="{accent}" stroke="none"/>
-    <path d="M179 206 Q200 232 221 206" fill="none"/>
-    <path d="M120 198 Q100 206 96 226" fill="none"/>
-    <path d="M280 198 Q300 206 304 226" fill="none"/>
-    {extra}
-  </g>
-  <circle cx="156" cy="202" r="11" fill="{cheek}"/>
-  <circle cx="244" cy="202" r="11" fill="{cheek}"/>
-</g></svg>'''
+def _datauri(name):
+    p = os.path.join(os.path.dirname(__file__), 'assets', name)
+    return 'data:image/jpeg;base64,' + base64.b64encode(open(p, 'rb').read()).decode()
 
-def kid_card(svg, star="⭐"):
-    return (f'<div class="card done"><div class="photo">{svg}'
-            f'<div class="star">{star}</div></div></div>')
+# A real photo of a child's drawing being snapped with a phone (authenticity:
+# "this is your own photo"), and a fire-truck crayon drawing used full-screen
+# as the clear-screen background.
+_PHOTO_URI     = _datauri('dino-photo.jpg')
+_FIRETRUCK_URI = _datauri('firetruck.jpg')
+
+# The asa board sitting behind the (partial) mosaic reveal.
+_ASA_TASKS = [
+    ("c1", "😴", "おきる"),     ("c2", "👕", "きがえ"),
+    ("c3", "🧦", "くつした"),   ("c4", "🍚", "あさごはん"),
+    ("c5", "🪥", "はみがき"),   ("c6", "🚽", "といれ"),
+]
+
+def dino_mosaic(flipped, uri=_DINO_URI, nw=DINO_W, nh=DINO_H, tasks=_ASA_TASKS):
+    """One picture covering the whole grid; only the flipped cards show their
+    window into it, the rest stay as ordinary task cards (アタック25 mid-reveal).
+    Mirrors the app's applyRewardSizing(): cover the grid, then offset per cell."""
+    cols, rows = 2, 3            # iPhone mock grid (see BASE .grid)
+    cardW, cardH, gap = 569, 420, 42
+    GW, GH = cols * cardW + (cols - 1) * gap, rows * cardH + (rows - 1) * gap
+    cover  = max(GW / nw, GH / nh)
+    iw, ih = nw * cover, nh * cover
+    offX, offY = (GW - iw) / 2, (GH - ih) / 2
+    cells = []
+    for i in range(cols * rows):
+        if i in flipped:
+            c, r = i % cols, i // cols
+            x = offX - c * (cardW + gap)
+            y = offY - r * (cardH + gap)
+            cells.append(
+                f'<div class="card done mosaic" style="background-image:url(\'{uri}\');'
+                f'background-size:{iw:.0f}px {ih:.0f}px;'
+                f'background-position:{x:.0f}px {y:.0f}px;"></div>')
+        else:
+            cls, icon, label = tasks[i]
+            cells.append(task(cls, icon, label))
+    return '<div class="grid">' + ''.join(cells) + '</div>'
 
 # ---------- ASA ----------
 asa = STATUS.format(time="7:00") + """
@@ -225,21 +239,15 @@ celebration = STATUS.format(time="7:12") + """
 """
 
 # ---------- CARD BACK IMAGE (v1.1) — lead screenshot ----------
-# Done cards show ORIGINAL child's-crayon mascots (stand-ins for a user's photo/drawing).
-kid_a = kid_drawing(body="#8fd9c4", ear="#8fd9c4", cheek="#ff9bb0", accent="#3a4a55", paper="#fdf3df", seed=4)
-kid_b = kid_drawing(body="#ffb27a", ear="#ffb27a", cheek="#ff7e8f", accent="#5a3a2a", paper="#eaf6ff", seed=9,
-                    extra='<path d="M200 200 q-12 -16 -24 -2 q-2 14 24 28 q26 -14 24 -28 q-12 -14 -24 2 Z" fill="#fff3c4"/>')
+# One picture (a real child's crayon drawing) spans all six cards; flipping
+# each completed card reveals its slice, アタック25-style.
 cardback = STATUS.format(time="7:08") + """
-<div class="caption">できたカードに、おうちの写真</div>
-<div class="subcap">お気に入りの1枚で、もっとうれしい「できた！」</div>
-<div class="hero-main">できた　を　もっと自分ごとに</div>
-<div class="hero-sub">設定した写真は、端末のなかだけに保存されます</div>
+<div class="caption">朝のしたくを楽しくすすめる</div>
+<div class="subcap">できるたびに、お気に入りの絵が少しずつあらわれる</div>
+<div class="hero-main">できたら　おしてみよう！</div>
+<div class="hero-sub">平日の朝をちょっとラクにする、したくサポート</div>
 <div class="tabs"><div class="tab active">☀️ あさ</div><div class="tab">🌙 よる</div></div>
-""" + grid([
-    kid_card(kid_a), kid_card(kid_b),
-    task("c3","🧦","くつした"), task("c4","🍚","あさごはん"),
-    task("c5","🪥","はみがき"), task("c6","🚽","といれ"),
-])
+""" + dino_mosaic({0, 3, 4})
 
 # ---------- CLEAR IMAGE (v1.1) ----------
 random.seed(11)
@@ -251,7 +259,7 @@ clearimg = STATUS.format(time="7:12") + """
 <div class="caption">クリア画面も、自分だけの1枚に</div>
 <div class="subcap">ぜんぶできたごほうびに、お気に入りの写真を。</div>
 <div class="celeb photobg">
-  <div class="photoback"><div class="sun"></div><div class="hill back"></div><div class="hill front"></div></div>
+  <div class="photoback shot" style="background-image:url('""" + _FIRETRUCK_URI + """');"></div>
 """ + conf2 + """
   <div class="big">🌟</div>
   <div class="txt">がんばったね！</div>
@@ -259,14 +267,25 @@ clearimg = STATUS.format(time="7:12") + """
 </div>
 """
 
+# ---------- PHOTO (v1.1) — "use your child's own drawing/photo" + privacy ----------
+photo_shot = STATUS.format(time="7:06") + """
+<div class="caption">子どもが好きな絵や写真を使える！</div>
+<div class="subcap">スマホで撮るだけ。お気に入りの1枚が、カードに変わります。</div>
+<div class="photoshot">
+  <img src=\"""" + _PHOTO_URI + """\">
+  <div class="tag">🔒 撮った写真はサーバに送られないから安心</div>
+</div>
+"""
+
 # ss-1 is the card-back image shot (v1.1 headline); the plain あさ board
 # (`asa`, still defined above) was retired in favour of it.
 out = {
     'ss-1-cardback.html': BASE.format(bodyclass='', body=cardback),
-    'ss-2-yoru.html': BASE.format(bodyclass='night', body=yoru),
-    'ss-3-settings.html': BASE.format(bodyclass='', body=settings),
-    'ss-4-celebration.html': BASE.format(bodyclass='', body=celebration),
-    'ss-5-clearimage.html': BASE.format(bodyclass='', body=clearimg),
+    'ss-2-photo.html': BASE.format(bodyclass='', body=photo_shot),
+    'ss-3-clearimage.html': BASE.format(bodyclass='', body=clearimg),
+    'ss-4-yoru.html': BASE.format(bodyclass='night', body=yoru),
+    'ss-5-settings.html': BASE.format(bodyclass='', body=settings),
+    'ss-6-celebration.html': BASE.format(bodyclass='', body=celebration),
 }
 for name, html in out.items():
     with open('/tmp/' + name, 'w') as f:

@@ -247,11 +247,9 @@
 
     /* reward image on the card back (when set in settings) */
     .card-back.has-img { background-size: cover; background-position: center; }
-    .card-back.has-img .card-check { display: none; }
-    .card-back.has-img .card-star {
-      position: absolute; top: 8px; right: 10px;
-      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
-    }
+    /* with a picture, the card shows only its slice — no check/star overlay */
+    .card-back.has-img .card-check,
+    .card-back.has-img .card-star { display: none; }
 
     body.night .card-label { color: #c0c0e0; }
 
@@ -551,6 +549,7 @@
     .reward-title { font-weight: bold; color: #444; font-size: 0.98rem; align-self: flex-start; }
     .reward-desc  { color: #999; font-size: 0.78rem; margin-top: 2px; align-self: flex-start; }
     .reward-frame {
+      position: relative;
       width: 150px; height: 180px; margin: 14px 0 4px;
       border-radius: 14px; border: 2px dashed #ddd;
       background: #f3f3f5 no-repeat;
@@ -560,6 +559,10 @@
     }
     .reward-frame.set { border-style: solid; border-color: #ffd54f; cursor: grab; }
     .reward-frame.set:active { cursor: grabbing; }
+    /* panel-split guides on the editor preview (the picture is cut into cards) */
+    .frame-grid { position: absolute; inset: 0; pointer-events: none; border-radius: inherit; overflow: hidden; }
+    .frame-grid .fg-v { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: rgba(255,255,255,0.9); box-shadow: 0 0 2px rgba(0,0,0,0.35); }
+    .frame-grid .fg-h { position: absolute; left: 0; right: 0; height: 2px; margin-top: -1px; background: rgba(255,255,255,0.9); box-shadow: 0 0 2px rgba(0,0,0,0.35); }
     .reward-zoom { width: 80%; margin: 10px 0 2px; accent-color: #ff5a87; }
     .reward-hint { color: #bbb; font-size: 0.74rem; margin-bottom: 10px; }
     .reward-btns  { display: flex; gap: 8px; }
@@ -646,7 +649,7 @@
     </button>
     <button class="menu-row" onclick="openRewardPage()">
       <span class="menu-ic">🖼️</span>
-      <span class="menu-tx"><b>カードのうら</b><small>できたカード1まいごとに表示</small></span>
+      <span class="menu-tx"><b>カードのうら</b><small>6まいで1まいの絵。めくると完成</small></span>
       <span class="menu-arrow">›</span>
     </button>
     <button class="menu-row" onclick="openClearPage()">
@@ -690,10 +693,10 @@
   </div>
 
   <div class="reward-section">
-    <div class="reward-desc">できたカード1まいごとに表示されます（ぜんぶ共通）</div>
+    <div class="reward-desc">6まいのカードで1まいの絵に。カードがめくれるごとに、絵が少しずつ完成します</div>
     <div class="reward-frame" id="reward-frame">🖼️</div>
     <input type="range" id="reward-zoom" class="reward-zoom" min="1" max="3" step="0.01" value="1" oninput="edZoom(ED_REWARD, this.value)">
-    <div class="reward-hint" id="reward-hint">ドラッグで位置、スライダーで大きさを調整</div>
+    <div class="reward-hint" id="reward-hint">線はカードの切れ目。ドラッグで位置、スライダーで大きさを調整</div>
     <div class="reward-btns">
       <button class="reward-btn" onclick="document.getElementById('reward-file').click()">画像をえらぶ</button>
       <button class="reward-btn sub" id="reward-clear" onclick="edClear(ED_REWARD)">けす</button>
@@ -795,8 +798,9 @@
   let clearCfg          = null;  // shown on the celebration screen ("クリア")
   let settingsClearCfg  = null;
 
-  // Returns the card-back image for card i. Currently global; will become
-  // per-card later (just return a per-index value when that ships).
+  // One picture spans the whole grid; every card shares the same config and
+  // shows its own window into it (see applyRewardSizing). Kept as a function
+  // so a card index is available if per-card pictures are ever added.
   function getRewardCfg(i) { return rewardCfg; }
 
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -986,13 +990,43 @@
     applyRewardSizing();
   }
 
-  // Apply each reward image to its card back at the card's current size.
+  // The reward image is ONE picture spanning the whole grid. Each completed
+  // card reveals only its window into it (アタック25-style): as cards flip, the
+  // full picture is gradually uncovered. We position each card's background as
+  // a window into the single image scaled to cover the entire grid.
   function applyRewardSizing() {
-    document.querySelectorAll('#grid .card-back.has-img').forEach((el) => {
-      const cfg = getRewardCfg(+el.dataset.back);
-      if (!cfg) return;
-      const r = el.getBoundingClientRect();
-      applyImgBg(el, cfg, r.width, r.height);
+    const cfg = rewardCfg;
+    if (!cfg) return;
+    const grid  = document.getElementById('grid');
+    const wraps = grid.querySelectorAll('.card-wrap');
+    if (!wraps.length) return;
+    const gr = grid.getBoundingClientRect();
+    const GW = gr.width, GH = gr.height;
+
+    // Legacy images without a stored natural size: fall back to per-card cover.
+    if (!cfg.nw || !cfg.nh) {
+      grid.querySelectorAll('.card-back.has-img').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        applyImgBg(el, cfg, r.width, r.height);
+      });
+      return;
+    }
+
+    // Cover the whole grid, honour zoom, then pan via posX/posY (% of overflow).
+    const cover = Math.max(GW / cfg.nw, GH / cfg.nh) * (cfg.zoom || 1);
+    const imgW  = cfg.nw * cover, imgH = cfg.nh * cover;
+    const offX  = (GW - imgW) * (cfg.posX / 100);
+    const offY  = (GH - imgH) * (cfg.posY / 100);
+    wraps.forEach((wrap) => {
+      // Measure the (untransformed) wrap, not the 3D-rotated .card-back, so the
+      // window lines up with where the card actually sits in the grid.
+      const back = wrap.querySelector('.card-back.has-img');
+      if (!back) return;
+      const r = wrap.getBoundingClientRect();
+      back.style.backgroundImage    = `url('${cfg.img}')`;
+      back.style.backgroundRepeat   = 'no-repeat';
+      back.style.backgroundSize     = `${imgW}px ${imgH}px`;
+      back.style.backgroundPosition = `${offX - (r.left - gr.left)}px ${offY - (r.top - gr.top)}px`;
     });
   }
 
@@ -1092,8 +1126,9 @@
   // Each context binds the editor to one image config + its DOM ids.
   const ED_REWARD = {
     frameId: 'reward-frame', zoomId: 'reward-zoom', hintId: 'reward-hint', clearId: 'reward-clear',
-    placeholder: '🖼️',
-    aspect: () => { const c = document.querySelector('#grid .card-wrap'); if (c) { const r = c.getBoundingClientRect(); if (r.height) return r.width / r.height; } return 0.86; },
+    placeholder: '🖼️', grid: true,
+    // The picture spans the WHOLE grid, so the editor frame matches the grid's aspect.
+    aspect: () => { const g = document.getElementById('grid'); if (g) { const r = g.getBoundingClientRect(); if (r.height) return r.width / r.height; } return 0.86; },
     get: () => settingsRewardCfg, set: (v) => { settingsRewardCfg = v; },
   };
   const ED_CLEAR = {
@@ -1111,6 +1146,24 @@
     frame.style.width  = Math.round(h * ctx.aspect()) + 'px';
   }
 
+  // Draw panel-split guide lines on the editor preview, matching the live
+  // grid's columns/rows, so it's clear the picture is cut across the cards.
+  function edBuildFrameGrid(frame) {
+    const count = MODES[currentMode].tasks.length;
+    const cols  = calcColumns(count), rows = Math.ceil(count / cols);
+    const ov = document.createElement('div');
+    ov.className = 'frame-grid';
+    for (let c = 1; c < cols; c++) {
+      const l = document.createElement('div'); l.className = 'fg-v';
+      l.style.left = (c / cols * 100) + '%'; ov.appendChild(l);
+    }
+    for (let r = 1; r < rows; r++) {
+      const l = document.createElement('div'); l.className = 'fg-h';
+      l.style.top = (r / rows * 100) + '%'; ov.appendChild(l);
+    }
+    frame.appendChild(ov);
+  }
+
   function edUpdate(ctx) {
     const frame = document.getElementById(ctx.frameId);
     const zoom  = document.getElementById(ctx.zoomId);
@@ -1121,6 +1174,7 @@
       frame.classList.add('set');
       frame.textContent = '';
       applyImgBg(frame, cfg, frame.clientWidth, frame.clientHeight);
+      if (ctx.grid) edBuildFrameGrid(frame);   // show how the picture splits across cards
       zoom.value = cfg.zoom;
       zoom.style.display = ''; hint.style.display = ''; clr.style.display = '';
     } else {
