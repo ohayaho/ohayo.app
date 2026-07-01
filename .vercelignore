@@ -1,0 +1,8 @@
+# ホワイトリスト方式：公開ページ以外は一切デプロイしない。
+# アプリ本体 (webapp/)・iOSプロジェクト・マーケ素材などは配信対象外。
+*
+!index.html
+!privacy.html
+!support.html
+!terms.html
+!icon.svg

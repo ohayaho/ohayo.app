@@ -20,7 +20,7 @@
 		A20001 /* ohayoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ohayoApp.swift; sourceTree = "<group>"; };
 		A20002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A20003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A20004 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = index.html; path = ../index.html; sourceTree = SOURCE_ROOT; };
+		A20004 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = index.html; path = ../webapp/index.html; sourceTree = SOURCE_ROOT; };
 		A20005 /* icon.svg */ = {isa = PBXFileReference; lastKnownFileType = image.svg; name = icon.svg; path = ../icon.svg; sourceTree = SOURCE_ROOT; };
 		A20010 /* ohayo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ohayo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
