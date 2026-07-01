@@ -2,6 +2,8 @@
 # Generates 6 App Store screenshot HTML files (1320x2868) for できた！.
 import os
 import base64
+import re
+import unicodedata
 
 BASE = """
 <!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
@@ -24,9 +26,20 @@ body.night .status .time {{ color:#fff; }}
 body.night .batt {{ border-color:#fff; }} body.night .batt::after {{ background:#fff; }} body.night .batt .fill {{ background:#fff; }}
 .wifi path {{ fill:#111; }} body.night .wifi path {{ fill:#fff; }}
 /* caption */
-.caption {{ font-size:70px; font-weight:bold; color:#ff5a87; text-align:center; margin:46px 0 12px; white-space:nowrap; }}
+.caption {{ font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','BIZ UDPGothic',sans-serif;
+  font-size:70px; font-weight:800; color:#ff5a87; text-align:center; margin:46px 0 34px; white-space:nowrap; }}
 .subcap {{ font-size:38px; color:#b9728a; text-align:center; margin-bottom:38px; }}
 body.night .caption {{ color:#c7a8ff; }} body.night .subcap {{ color:#9a8fce; }}
+/* ss-1 headline: no ads (pink, bold, angular gothic, no shadow) */
+.adfree {{ font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','BIZ UDPGothic',sans-serif;
+  font-size:132px; font-weight:800; color:#ff5a87; text-align:center;
+  white-space:nowrap; margin:24px 0 -20px; letter-spacing:.02em; }}
+/* ss-1: frame the app screenshot so it reads separately from the caption/bg */
+body.framed {{ background:#edeef3; }}
+.appshot {{ width:100%; margin-top:26px; padding:44px 0 48px;
+  background:linear-gradient(160deg,#ffe0ec 0%,#fff5cc 50%,#d4f0ff 100%);
+  border-radius:60px; box-shadow:0 18px 48px rgba(0,0,0,.16);
+  display:flex; flex-direction:column; align-items:center; }}
 /* hero */
 .hero-main {{ font-size:88px; font-weight:bold; color:#ff5a87; text-shadow:4px 6px 0 #fff; white-space:nowrap; }}
 body.night .hero-main {{ color:#c7a8ff; text-shadow:3px 4px 0 rgba(0,0,0,.4); }}
@@ -96,8 +109,8 @@ body.night .done {{ background:linear-gradient(145deg,#2d1b69,#1a1a6e); border-b
   background:rgba(255,255,255,.78); padding:30px 56px; border-radius:80px;
   box-shadow:0 8px 22px rgba(0,0,0,.10); }}
 /* full-screen clear photo (v1.1) — the user's own picture fills the screen */
-.celeb.photobg {{ overflow:hidden; }}
-.celeb .photoback.shot {{ background-size:cover; background-position:center; }}
+.celeb.photobg {{ overflow:hidden; border-radius:60px; margin-bottom:44px; }}
+.celeb .photoback.shot {{ background-size:auto 152%; background-position:center; }}
 .celeb .photoback {{ position:absolute; inset:0; z-index:0; overflow:hidden;
   background:linear-gradient(#37286b 0%,#7a3f86 26%,#e9744f 60%,#ffc987 100%); }}
 .celeb .photoback::after {{ content:''; position:absolute; inset:0; z-index:3;
@@ -119,6 +132,37 @@ body.night .done {{ background:linear-gradient(145deg,#2d1b69,#1a1a6e); border-b
 # No fake status bar (time/wifi/battery). Each screen still calls
 # STATUS.format(time=...) for backwards-compat; an empty template yields "".
 STATUS = ""
+
+# ---- caption auto-sizing + trust badge ----------------------------------
+# Captions are the big promo lines. We size each one to fill (almost) the whole
+# content width on a single line, so short captions get much larger.
+_CONTENT_W = 1120   # 1320 − padding, with safety margin (caption is nowrap)
+
+def _text_units(s):
+    u = 0.0
+    for ch in s:
+        o = ord(ch)
+        if o >= 0x1F000 or 0x2600 <= o <= 0x27BF:   # emoji / pictographs
+            u += 1.15
+        elif ch == ' ':
+            u += 0.4
+        elif unicodedata.east_asian_width(ch) in ('F', 'W', 'A'):
+            u += 1.0
+        else:
+            u += 0.55
+    return u
+
+def _cap_size(text, cap=140, floor=80):
+    u = _text_units(text)
+    return int(max(floor, min(cap, _CONTENT_W / u))) if u else cap
+
+def enrich(body):
+    """Size each caption to fill (almost) one line."""
+    def _size_cap(m):
+        text  = m.group(1)
+        plain = re.sub(r'<[^>]+>', '', text)
+        return f'<div class="caption" style="font-size:{_cap_size(plain)}px">{text}</div>'
+    return re.sub(r'<div class="caption">(.*?)</div>', _size_cap, body, flags=re.S)
 
 def grid(cards):
     return '<div class="grid">' + ''.join(cards) + '</div>'
@@ -192,21 +236,17 @@ asa = STATUS.format(time="7:00") + """
 
 # ---------- YORU ----------
 yoru = STATUS.format(time="20:30") + """
-<div class="caption">よるのしたくも、たのしく 🌙</div>
-<div class="subcap">ねるまえのルーティンを、わくわくに。</div>
-<div class="hero-main">できたら　おしてみよう！</div>
-<div class="hero-sub">よるのしたくを、やさしくサポート</div>
+<div class="caption">おやすみの準備も</div>
 <div class="tabs"><div class="tab">☀️ あさ</div><div class="tab active">🌙 よる</div></div>
 """ + grid([
-    done("😴","🌙"), done("😴","🌙"),
+    task("c1","🛁","おふろ"),   task("c2","👕","パジャマ"),
     task("c3","🪥","はみがき"), task("c4","🚽","といれ"),
-    task("c5","📚","えほん"), task("c6","💤","ねる"),
+    task("c5","📚","えほん"),   task("c6","💤","ねる"),
 ])
 
 # ---------- SETTINGS ----------
 settings = STATUS.format(time="7:05") + """
-<div class="caption">アイコンも なまえも 自由に</div>
-<div class="subcap">わが家のしたくに、ぴったり合わせて。</div>
+<div class="caption" style="font-size:112px">わが家のしたくに<br>カスタマイズ</div>
 <div class="set-screen">
   <div class="set-head"><div class="back">‹ もどる</div><div class="ttl">⚙️ せってい</div><div class="rst">リセット</div></div>
   <div class="set-tabs"><div class="stab on">☀️ あさ</div><div class="stab">🌙 よる</div></div>
@@ -242,12 +282,15 @@ celebration = STATUS.format(time="7:12") + """
 # One picture (a real child's crayon drawing) spans all six cards; flipping
 # each completed card reveals its slice, アタック25-style.
 cardback = STATUS.format(time="7:08") + """
+<div class="adfree">広告なし！</div>
 <div class="caption">朝のしたくを楽しくすすめる</div>
-<div class="subcap">できるたびに、お気に入りの絵が少しずつあらわれる</div>
+<div class="appshot">
 <div class="hero-main">できたら　おしてみよう！</div>
 <div class="hero-sub">平日の朝をちょっとラクにする、したくサポート</div>
 <div class="tabs"><div class="tab active">☀️ あさ</div><div class="tab">🌙 よる</div></div>
-""" + dino_mosaic({0, 3, 4})
+""" + dino_mosaic({0, 3}) + """
+</div>
+"""
 
 # ---------- CLEAR IMAGE (v1.1) ----------
 random.seed(11)
@@ -256,8 +299,7 @@ conf2 = ''.join(
     f'background:{random.choice(colors)}; transform:rotate({random.randint(0,360)}deg);"></div>'
     for _ in range(70))
 clearimg = STATUS.format(time="7:12") + """
-<div class="caption">クリア画面も、自分だけの1枚に</div>
-<div class="subcap">ぜんぶできたごほうびに、お気に入りの写真を。</div>
+<div class="caption">子どものやる気アップ</div>
 <div class="celeb photobg">
   <div class="photoback shot" style="background-image:url('""" + _FIRETRUCK_URI + """');"></div>
 """ + conf2 + """
@@ -269,23 +311,22 @@ clearimg = STATUS.format(time="7:12") + """
 
 # ---------- PHOTO (v1.1) — "use your child's own drawing/photo" + privacy ----------
 photo_shot = STATUS.format(time="7:06") + """
-<div class="caption">子どもが好きな絵や写真を使える！</div>
-<div class="subcap">スマホで撮るだけ。お気に入りの1枚が、カードに変わります。</div>
+<div class="caption">好きな画像を使える！</div>
 <div class="photoshot">
   <img src=\"""" + _PHOTO_URI + """\">
-  <div class="tag">🔒 撮った写真はサーバに送られないから安心</div>
+  <div class="tag">🔒 画像はサーバに送られないから安心</div>
 </div>
 """
 
 # ss-1 is the card-back image shot (v1.1 headline); the plain あさ board
 # (`asa`, still defined above) was retired in favour of it.
 out = {
-    'ss-1-cardback.html': BASE.format(bodyclass='', body=cardback),
-    'ss-2-photo.html': BASE.format(bodyclass='', body=photo_shot),
-    'ss-3-clearimage.html': BASE.format(bodyclass='', body=clearimg),
-    'ss-4-yoru.html': BASE.format(bodyclass='night', body=yoru),
-    'ss-5-settings.html': BASE.format(bodyclass='', body=settings),
-    'ss-6-celebration.html': BASE.format(bodyclass='', body=celebration),
+    'ss-1-cardback.html': BASE.format(bodyclass='framed', body=enrich(cardback)),
+    'ss-2-photo.html': BASE.format(bodyclass='', body=enrich(photo_shot)),
+    'ss-3-clearimage.html': BASE.format(bodyclass='', body=enrich(clearimg)),
+    'ss-4-yoru.html': BASE.format(bodyclass='night', body=enrich(yoru)),
+    'ss-5-settings.html': BASE.format(bodyclass='', body=enrich(settings)),
+    'ss-6-celebration.html': BASE.format(bodyclass='', body=enrich(celebration)),
 }
 for name, html in out.items():
     with open('/tmp/' + name, 'w') as f:
