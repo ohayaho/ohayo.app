@@ -749,9 +749,20 @@
       touch-action: manipulation;
     }
     .paywall-x:active { background: #e5e5ea; }
-    .paywall-title { font-size: 1.3rem; color: #ff5a87; margin: 6px 0 16px; font-weight: bold; }
+    .paywall-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 1.3rem; color: #ff5a87; margin: 6px 0 16px; font-weight: bold;
+      transform: translateX(-14px);
+    }
+    .paywall-spark { font-size: 2.6rem; line-height: 1; flex-shrink: 0; }
+    .paywall-titletxt { text-align: left; line-height: 1.3; }
     .paywall-feats { list-style: none; text-align: left; margin: 0 auto 18px; display: inline-block; }
-    .paywall-feats li { color: #444; font-size: 0.9rem; margin: 8px 0; font-weight: bold; white-space: nowrap; }
+    .paywall-feats li { display: flex; align-items: center; gap: 10px; color: #444; font-size: 0.9rem; margin: 10px 0; font-weight: bold; white-space: nowrap; }
+    .paywall-feats .chk { width: 23px; height: 23px; flex-shrink: 0; display: block; }
+    .paywall-feats li.soon { color: #ff5a87; margin-top: 14px; }
     .paywall-buy {
       width: 100%;
       font-family: inherit; font-size: 1.15rem; font-weight: bold;
@@ -837,7 +848,7 @@
     </button>
     <button class="menu-row danger" id="menu-reset" onclick="resetDefaults()">
       <span class="menu-ic">↩︎</span>
-      <span class="menu-tx"><b>カードを初期状態に戻す</b><small class="reset-note" style="display:none;">プレミアムでカードを編集できます</small></span>
+      <span class="menu-tx"><b>カードを初期状態に戻す</b></span>
     </button>
   </div>
 
@@ -891,7 +902,6 @@
     <div class="reward-hint" id="reward-hint">線はカードの切れ目。ドラッグで位置、スライダーで大きさを調整</div>
     <div class="reward-btns">
       <button class="reward-btn" id="reward-choose" onclick="document.getElementById('reward-file').click()">画像を選ぶ</button>
-      <button class="reward-btn sub" id="reward-clear" onclick="edClear(ED_REWARD)">消す</button>
     </div>
     <input type="file" id="reward-file" accept="image/*" onchange="edHandleFile(ED_REWARD, this)">
   </div>
@@ -931,12 +941,13 @@
 <div id="paywall" class="paywall-overlay">
   <div class="paywall-card">
     <button class="paywall-x" onclick="closePaywall()" aria-label="とじる">✕</button>
-    <h3 class="paywall-title">✨ プレミアムで<br>もっと自由に</h3>
+    <h3 class="paywall-title"><span class="paywall-spark">✨</span><span class="paywall-titletxt">プレミアムで<br>もっと自由に</span></h3>
     <ul class="paywall-feats">
-      <li>🃏 カードのアイコン・名前を変更</li>
-      <li>🎉 クリア画像を設定</li>
-      <li>🖼️ カードの裏を何度でも変更</li>
-      <li>🌙 よるモードを全部使える</li>
+      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>カードのアイコン・名前を変更</li>
+      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>クリア画像を設定</li>
+      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>カードの裏を何度でも変更</li>
+      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>よるモードを全部使える</li>
+      <li class="soon"><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M12 6.4 V17.6 M6.4 12 H17.6" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>今後も新機能を追加予定！</li>
     </ul>
     <button class="paywall-buy" id="paywall-buy" onclick="paywallBuy()">
       <span id="paywall-buy-label">購入する</span>
@@ -1263,11 +1274,7 @@
     });
     // 無料版はカード編集自体ができないので「初期状態に戻す」は非活性。
     const reset = document.getElementById('menu-reset');
-    if (reset) {
-      reset.disabled = !prem;
-      const note = reset.querySelector('.reset-note');
-      if (note) note.style.display = prem ? 'none' : '';
-    }
+    if (reset) reset.disabled = !prem;
     if (document.getElementById('paywall').classList.contains('open')) {
       updatePaywallState();
     }
@@ -1312,7 +1319,7 @@
     rewardEditLocked = locked;
     const sec = document.querySelector('#settings-reward .reward-section');
     if (sec) sec.classList.toggle('locked', locked);
-    ['reward-zoom', 'reward-choose', 'reward-clear', 'reward-save'].forEach(id => {
+    ['reward-zoom', 'reward-choose', 'reward-save'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.disabled = locked;
     });
@@ -1634,12 +1641,12 @@
       applyImgBg(frame, cfg, frame.clientWidth, frame.clientHeight);
       if (ctx.grid) edBuildFrameGrid(frame);   // show how the picture splits across cards
       zoom.value = cfg.zoom;
-      zoom.style.display = ''; hint.style.display = ''; clr.style.display = '';
+      zoom.style.display = ''; hint.style.display = ''; if (clr) clr.style.display = '';
     } else {
       frame.classList.remove('set');
       frame.textContent = ctx.placeholder;
       frame.style.backgroundImage = '';
-      zoom.style.display = 'none'; hint.style.display = 'none'; clr.style.display = 'none';
+      zoom.style.display = 'none'; hint.style.display = 'none'; if (clr) clr.style.display = 'none';
     }
   }
 
