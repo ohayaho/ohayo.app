@@ -782,6 +782,39 @@
     .paywall-restore:active { color: #555; }
     .paywall-note { color: #aaa; font-size: 0.76rem; margin-top: 12px; line-height: 1.5; }
 
+    /* ===== CONFIRM DIALOG ===== */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 550;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .confirm-overlay.open { display: flex; animation: fadeIn 0.15s ease; }
+    .confirm-card {
+      width: min(320px, 100%);
+      background: #fff;
+      border-radius: 20px;
+      padding: 24px 22px 18px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .confirm-msg { color: #333; font-size: 1rem; font-weight: bold; line-height: 1.6; margin-bottom: 20px; }
+    .confirm-btns { display: flex; gap: 10px; }
+    .confirm-btns button {
+      flex: 1;
+      font-family: inherit; font-size: 1rem; font-weight: bold;
+      padding: 13px; border: none; border-radius: 12px;
+      cursor: pointer; touch-action: manipulation;
+    }
+    .confirm-cancel { background: #eee; color: #888; }
+    .confirm-cancel:active { background: #e0e0e0; }
+    .confirm-ok { background: linear-gradient(135deg, #ff5a87, #ff8c69); color: #fff; }
+    .confirm-ok:active { transform: scale(0.98); }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 699px) {
       .hero-main { text-shadow: none; }
@@ -837,7 +870,7 @@
     </button>
     <button class="menu-row" onclick="openRewardPage()">
       <span class="menu-ic"><svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" width="44" height="44"><defs><clipPath id="ic-bk"><rect x="0" y="0" width="44" height="44" rx="9"/></clipPath><linearGradient id="ic-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd3ff"/><stop offset="1" stop-color="#dff4ff"/></linearGradient></defs><g clip-path="url(#ic-bk)"><rect x="0" y="0" width="44" height="44" fill="url(#ic-sky)"/><circle cx="33" cy="12" r="5" fill="#ffe27a"/><path d="M-2,46 Q11,27 22,32 Q33,37 46,28 L46,46 Z" fill="#8bd18b"/><path d="M-2,46 Q14,34 26,38 Q36,41 46,35 L46,46 Z" fill="#68bd68"/><line x1="14.67" y1="0" x2="14.67" y2="44" stroke="#fff" stroke-width="1.3" opacity="0.92"/><line x1="29.33" y1="0" x2="29.33" y2="44" stroke="#fff" stroke-width="1.3" opacity="0.92"/><line x1="0" y1="22" x2="44" y2="22" stroke="#fff" stroke-width="1.3" opacity="0.92"/></g><rect x="0.5" y="0.5" width="43" height="43" rx="8.5" fill="none" stroke="#dfe0ea" stroke-width="1"/></svg></span>
-      <span class="menu-tx"><b>カード（裏）</b><small><span class="free-em">1回まで変更無料！</span><br>カードをタップしたときに表示される画像を変更します</small></span>
+      <span class="menu-tx"><b>カード（裏）</b><small><span class="free-em">1回まで変更無料！<br></span>カードをタップしたときに表示される画像を変更します</small></span>
       <span class="menu-arrow">›</span>
     </button>
     <button class="menu-row" onclick="openClearPage()">
@@ -929,7 +962,6 @@
     <div class="reward-hint" id="clear-hint">ドラッグで位置、スライダーで大きさを調整</div>
     <div class="reward-btns">
       <button class="reward-btn" onclick="document.getElementById('clear-file').click()">画像を選ぶ</button>
-      <button class="reward-btn sub" id="clear-clear" onclick="edClear(ED_CLEAR)">消す</button>
     </div>
     <input type="file" id="clear-file" accept="image/*" onchange="edHandleFile(ED_CLEAR, this)">
   </div>
@@ -954,6 +986,17 @@
     </button>
     <button class="paywall-restore" onclick="paywallRestore()">購入を復元</button>
     <p class="paywall-note" id="paywall-note">1回のお支払いでずっと使えます</p>
+  </div>
+</div>
+
+<!-- ===== CONFIRM DIALOG ===== -->
+<div id="confirm-modal" class="confirm-overlay">
+  <div class="confirm-card">
+    <p class="confirm-msg" id="confirm-msg"></p>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="confirmResolve(false)">キャンセル</button>
+      <button class="confirm-ok" onclick="confirmResolve(true)">リセット</button>
+    </div>
   </div>
 </div>
 
@@ -1270,6 +1313,10 @@
   function refreshPremiumUI() {
     const prem = OhayoStore.isPremium();
     document.querySelectorAll('.premium-lock').forEach(el => {
+      el.style.display = prem ? 'none' : '';
+    });
+    // 「1回まで変更無料！」はプレミアム購入後は不要なので非表示
+    document.querySelectorAll('.free-em').forEach(el => {
       el.style.display = prem ? 'none' : '';
     });
     // 無料版はカード編集自体ができないので「初期状態に戻す」は非活性。
@@ -1833,11 +1880,28 @@
     }));
   }
 
+  // WKWebView は window.confirm を無視するので、自前の確認ダイアログを使う。
+  let _confirmCb = null;
+  function showConfirm(msg, onOk) {
+    document.getElementById('confirm-msg').textContent = msg;
+    _confirmCb = onOk || null;
+    document.getElementById('confirm-modal').classList.add('open');
+  }
+  function confirmResolve(ok) {
+    document.getElementById('confirm-modal').classList.remove('open');
+    const cb = _confirmCb; _confirmCb = null;
+    if (ok && cb) cb();
+  }
+
   function resetDefaults() {
     if (!OhayoStore.isPremium()) { openPaywall('tasks'); return; }
-    if (!confirm('カードを初期状態に戻しますか？')) return;
+    showConfirm('設定が全て初期化されます。本当にリセットしますか？', doResetDefaults);
+  }
+  function doResetDefaults() {
     MODES.asa.tasks  = DEFAULT_MODES.asa.tasks.map(t  => ({...t}));
     MODES.neru.tasks = DEFAULT_MODES.neru.tasks.map(t => ({...t}));
+    rewardCfg = { asa: DEFAULT_REWARD_CFG ? { ...DEFAULT_REWARD_CFG } : null, neru: null };
+    clearCfg  = { asa: DEFAULT_CLEAR_CFG  ? { ...DEFAULT_CLEAR_CFG }  : null, neru: null };
     saveToStorage();
     va('event', { name: 'settings_reset' });
     doneCount = 0;

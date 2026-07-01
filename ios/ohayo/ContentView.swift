@@ -8,6 +8,12 @@ let kPremiumProductID = "app.ohayo.ohayo.premium"
 // The card-back image may be set this many times for free; further changes need premium.
 let kFreeCardBackChanges = 1
 
+#if DEBUG
+// TESTING ONLY: force premium unlocked in Debug builds so paid features can be
+// checked on-device without a real purchase. Release/Archive builds ignore this.
+let kDebugForcePremium = true
+#endif
+
 struct ContentView: UIViewRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -178,6 +184,9 @@ final class Store: ObservableObject {
                 owned = true
             }
         }
+        #if DEBUG
+        if kDebugForcePremium { owned = true }   // debug-only override; never in Release
+        #endif
         isPremium = owned
     }
 
