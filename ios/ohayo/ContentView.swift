@@ -73,13 +73,15 @@ struct ContentView: UIViewRepresentable {
             }
         }
 
-        // Open mailto:/tel: in the system (Mail/Phone); keep the local page for everything else.
+        // The app itself is a local file:// page. Anything that would leave it
+        // (mailto:, tel:, http(s) links like the privacy policy / terms) opens
+        // in the system (Mail / Safari) instead of navigating the WebView away.
         func webView(_ webView: WKWebView,
                      decidePolicyFor navigationAction: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
             if let url = navigationAction.request.url,
                let scheme = url.scheme?.lowercased(),
-               scheme == "mailto" || scheme == "tel" {
+               ["mailto", "tel", "http", "https"].contains(scheme) {
                 UIApplication.shared.open(url)
                 decisionHandler(.cancel)
                 return
