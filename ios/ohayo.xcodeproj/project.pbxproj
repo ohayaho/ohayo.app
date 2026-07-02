@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		603730932FF5122E00A55932 /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 603730922FF5122D00A55932 /* Configuration.storekit */; };
 		A10001 /* ohayoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20001 /* ohayoApp.swift */; };
 		A10002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20002 /* ContentView.swift */; };
 		A10003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20003 /* Assets.xcassets */; };
@@ -15,10 +16,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		603730922FF5122D00A55932 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 		A20001 /* ohayoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ohayoApp.swift; sourceTree = "<group>"; };
 		A20002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A20003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A20004 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = index.html; path = ../index.html; sourceTree = SOURCE_ROOT; };
+		A20004 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = index.html; path = ../webapp/index.html; sourceTree = SOURCE_ROOT; };
 		A20005 /* icon.svg */ = {isa = PBXFileReference; lastKnownFileType = image.svg; name = icon.svg; path = ../icon.svg; sourceTree = SOURCE_ROOT; };
 		A20010 /* ohayo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ohayo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -39,6 +41,7 @@
 			children = (
 				A40002 /* ohayo */,
 				A40003 /* Products */,
+				603730922FF5122D00A55932 /* Configuration.storekit */,
 			);
 			sourceTree = "<group>";
 		};
@@ -129,6 +132,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10003 /* Assets.xcassets in Resources */,
+				603730932FF5122E00A55932 /* Configuration.storekit in Resources */,
 				A10004 /* index.html in Resources */,
 				A10005 /* icon.svg in Resources */,
 			);
@@ -202,7 +206,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = M7BAN3KLA5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "できた！";
@@ -215,7 +219,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.ohayo.ohayo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -231,7 +235,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = M7BAN3KLA5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "できた！";
@@ -244,7 +248,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.ohayo.ohayo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
