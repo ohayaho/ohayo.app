@@ -6,19 +6,6 @@
   <title>できた！</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
-  <script>
-    // Vercel Analytics — web only. Disabled in the native app (file://) for
-    // App Store Kids Category compliance: no third-party analytics on device.
-    if (location.protocol === 'file:') {
-      window.va = function () {};
-    } else {
-      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-      var vaScript = document.createElement('script');
-      vaScript.defer = true;
-      vaScript.src = '/_vercel/insights/script.js';
-      document.head.appendChild(vaScript);
-    }
-  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1389,7 +1376,6 @@
   }
 
   function onPremiumUnlocked() {
-    va('event', { name: 'premium_unlocked' });
     closePaywall();
     const act = pendingPremiumAction;
     pendingPremiumAction = null;
@@ -1403,7 +1389,6 @@
   function openPaywall(intent, peekPage) {
     pendingPremiumAction = intent || null;
     paywallPeekPage = peekPage || null;   // 裏に見せている設定画面（閉じたら一緒に閉じる）
-    va('event', { name: 'paywall_shown', data: { intent: intent || '' } });
     document.getElementById('paywall-note').textContent = '1回のお支払いでずっと使えます';
     updatePaywallState();
     document.getElementById('paywall').classList.add('open');
@@ -1450,7 +1435,6 @@
   function switchMode(mode) {
     if (mode === currentMode) return;
     if (mode === 'neru' && !OhayoStore.isPremium()) { openPaywall('night'); return; }   // よるモードはプレミアム限定
-    va('event', { name: 'mode_switch', data: { mode } });
     currentMode = mode;
     document.body.classList.toggle('night', mode === 'neru');
     setActiveTab('tab', mode);
@@ -1528,7 +1512,6 @@
     doneCount++;
     haptic('medium');
     playDing();
-    va('event', { name: 'card_flip', data: { mode: currentMode, task: MODES[currentMode].tasks[i].label, count: doneCount } });
     if (doneCount === MODES[currentMode].tasks.length) {
       setTimeout(showCelebration, 700);
     }
@@ -1537,7 +1520,6 @@
   function showCelebration() {
     haptic('success');
     playFanfare();
-    va('event', { name: 'celebration', data: { mode: currentMode } });
     const mode = MODES[currentMode];
     const el   = document.getElementById('celebration');
     el.className = `${mode.celebClass} show`;
@@ -1626,7 +1608,6 @@
     MODES.asa.tasks  = settingsBuffer.asa.map(t  => ({...t}));
     MODES.neru.tasks = settingsBuffer.neru.map(t => ({...t}));
     saveToStorage();
-    va('event', { name: 'settings_save' });
     doneCount = 0;
     clearCelebration();
     buildCards();
@@ -1903,7 +1884,6 @@
     rewardCfg = { asa: DEFAULT_REWARD_CFG ? { ...DEFAULT_REWARD_CFG } : null, neru: null };
     clearCfg  = { asa: DEFAULT_CLEAR_CFG  ? { ...DEFAULT_CLEAR_CFG }  : null, neru: null };
     saveToStorage();
-    va('event', { name: 'settings_reset' });
     doneCount = 0;
     clearCelebration();
     buildCards();
