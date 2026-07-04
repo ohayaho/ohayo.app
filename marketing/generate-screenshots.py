@@ -30,16 +30,20 @@ body.night .batt {{ border-color:#fff; }} body.night .batt::after {{ background:
   font-size:70px; font-weight:800; color:#ff5a87; text-align:center; margin:46px 0 34px; white-space:nowrap; }}
 .subcap {{ font-size:38px; color:#b9728a; text-align:center; margin-bottom:38px; }}
 body.night .caption {{ color:#c7a8ff; }} body.night .subcap {{ color:#9a8fce; }}
-/* ss-1 headline: no ads (pink, bold, angular gothic, no shadow) */
-.adfree {{ font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','BIZ UDPGothic',sans-serif;
-  font-size:132px; font-weight:800; color:#ff5a87; text-align:center;
-  white-space:nowrap; margin:24px 0 -20px; letter-spacing:.02em; }}
+/* ss-1: "no ads" badge at the top-left of the canvas, above the caption */
+.adfree-badge {{ position:absolute; top:56px; left:56px; z-index:2;
+  font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','BIZ UDPGothic',sans-serif;
+  font-size:58px; font-weight:800; color:#fff; background:#ff5a87;
+  padding:28px 56px; border-radius:80px; white-space:nowrap;
+  box-shadow:0 10px 26px rgba(255,90,135,.45); transform:rotate(-5deg); }}
 /* ss-1: frame the app screenshot so it reads separately from the caption/bg */
 body.framed {{ background:#edeef3; }}
-.appshot {{ width:100%; margin-top:26px; padding:44px 0 48px;
+.appshot {{ position:relative; width:100%; margin-top:40px; padding:70px 0 56px;
   background:linear-gradient(160deg,#ffe0ec 0%,#fff5cc 50%,#d4f0ff 100%);
   border-radius:60px; box-shadow:0 18px 48px rgba(0,0,0,.16);
   display:flex; flex-direction:column; align-items:center; }}
+/* ss-1 only: slightly taller cards so the frame fills the canvas */
+.appshot .card {{ height:500px; }}
 /* hero */
 .hero-main {{ font-size:88px; font-weight:bold; color:#ff5a87; text-shadow:4px 6px 0 #fff; white-space:nowrap; }}
 body.night .hero-main {{ color:#c7a8ff; text-shadow:3px 4px 0 rgba(0,0,0,.4); }}
@@ -200,8 +204,8 @@ def dino_mosaic(flipped, uri=_DINO_URI, nw=DINO_W, nh=DINO_H, tasks=_ASA_TASKS):
     """One picture covering the whole grid; only the flipped cards show their
     window into it, the rest stay as ordinary task cards (アタック25 mid-reveal).
     Mirrors the app's applyRewardSizing(): cover the grid, then offset per cell."""
-    cols, rows = 2, 3            # iPhone mock grid (see BASE .grid)
-    cardW, cardH, gap = 569, 420, 42
+    cols, rows = 2, 3            # iPhone mock grid (see BASE .grid; ss-1 cards are 470px tall)
+    cardW, cardH, gap = 569, 500, 42
     GW, GH = cols * cardW + (cols - 1) * gap, rows * cardH + (rows - 1) * gap
     cover  = max(GW / nw, GH / nh)
     iw, ih = nw * cover, nh * cover
@@ -278,15 +282,15 @@ celebration = STATUS.format(time="7:12") + """
 </div>
 """
 
-# ---------- CARD BACK IMAGE (v1.1) — lead screenshot ----------
+# ---------- CARD BACK IMAGE — lead screenshot (v1.2.1) ----------
 # One picture (a real child's crayon drawing) spans all six cards; flipping
 # each completed card reveals its slice, アタック25-style.
+# Headline is the emotional hook; "no ads" moved to a corner badge.
 cardback = STATUS.format(time="7:08") + """
-<div class="adfree">広告なし！</div>
-<div class="caption">朝のしたくを楽しくすすめる</div>
+<div class="adfree-badge">広告なし</div>
+<div class="caption" style="font-size:112px; line-height:1.35; margin:140px 0 40px">「はやくして！」と<br>言わない朝へ</div>
 <div class="appshot">
 <div class="hero-main">できたら　おしてみよう！</div>
-<div class="hero-sub">平日の朝をちょっとラクにする、したくサポート</div>
 <div class="tabs"><div class="tab active">☀️ あさ</div><div class="tab">🌙 よる</div></div>
 """ + dino_mosaic({0, 3}) + """
 </div>

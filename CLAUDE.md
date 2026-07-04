@@ -1,7 +1,7 @@
-# できた！
+# できタップ
 
 子ども向けの朝・夜したくトラッカー（iOSアプリ）。
-（アプリ名は「できた！」。ドメインは `ohayo-app.com`、Bundle ID は `app.ohayo.ohayo` のまま）
+（アプリ名は「できタップ」。v1.2.1で「できた！」から改名。ドメインは `ohayo-app.com`、Bundle ID は `app.ohayo.ohayo` のまま）
 
 ## 構成
 - **アプリ本体**: `webapp/index.html`（単一ファイルに HTML/CSS/JS をすべて埋め込み、外部依存なし）。iOSの WKWebView にバンドルされる（`ios/` の Xcode プロジェクトが参照）

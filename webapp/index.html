@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>できた！</title>
+  <title>できタップ</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
   <style>
@@ -175,15 +175,6 @@
       color: #c7a8ff;
       text-shadow: 2px 3px 0 rgba(0,0,0,0.4), 0 0 24px rgba(180,140,255,0.5);
     }
-
-    .hero-sub {
-      font-size: clamp(0.75rem, 2.5vw, 1rem);
-      color: #999;
-      margin-top: 4px;
-      transition: color 0.4s;
-    }
-
-    body.night .hero-sub { color: #7a7aaa; }
 
 /* ===== GRID ===== */
     .grid {
@@ -465,6 +456,22 @@
     .menu-tx small .free-em { color: #f5820a; font-weight: bold; }
     .menu-arrow { color: #ccc; font-size: 1.5rem; font-weight: bold; flex-shrink: 0; }
     .menu-row.danger b { color: #e0607f; }
+
+    /* app name in the settings footer — Yusei Magic のサブセット。
+       「できタップ」の5文字ぶんのグリフしか含まないので、他のテキストには使えない */
+    @font-face {
+      font-family: 'Yusei Magic Subset';
+      src: url(data:font/woff;base64,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) format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+    .settings-foot .app-name {
+      font-family: 'Yusei Magic Subset', 'Hiragino Maru Gothic ProN', sans-serif;
+      font-size: 1.15rem;
+      color: #ff5a87;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
 
     /* contact footer in the settings hub */
     .settings-foot {
@@ -813,7 +820,6 @@
 <!-- ===== HERO ===== -->
 <div class="hero">
   <div class="hero-main">できたら　おしてみよう！</div>
-  <div class="hero-sub">平日の朝をちょっとラクにする、したくサポート</div>
 </div>
 
 <!-- ===== TOP BAR ===== -->
@@ -873,6 +879,7 @@
   </div>
 
   <div class="settings-foot">
+    <div class="app-name">できタップ</div>
     <a href="https://ohayo-app.com/privacy.html">プライバシーポリシー</a>　<a href="https://ohayo-app.com/terms.html">利用規約</a><br>
     お問い合わせ<br><a href="mailto:support@ohayo-app.com">support@ohayo-app.com</a>
   </div>
