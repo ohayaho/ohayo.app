@@ -75,7 +75,7 @@ body.night .done {{ background:linear-gradient(145deg,#2d1b69,#1a1a6e); border-b
 .set-head .back {{ font-size:42px; font-weight:bold; color:#ff5a87; }}
 .set-head .ttl {{ font-size:46px; font-weight:bold; color:#333; }}
 .set-head .rst {{ font-size:38px; font-weight:bold; color:#bbb; }}
-.set-tabs {{ display:flex; gap:16px; justify-content:center; padding:40px 0 14px; }}
+.set-tabs {{ display:flex; gap:16px; justify-content:center; padding:40px 0 36px; }}
 .stab {{ font-size:40px; font-weight:bold; padding:18px 60px; border-radius:60px; border:4px solid #e2e2e2; background:#fff; color:#aaa; }}
 .stab.on {{ background:#ff5a87; border-color:#ff5a87; color:#fff; }}
 .set-hint {{ text-align:center; color:#bbb; font-size:34px; padding:6px 0 30px; }}
@@ -252,9 +252,8 @@ yoru = STATUS.format(time="20:30") + """
 settings = STATUS.format(time="7:05") + """
 <div class="caption" style="font-size:112px">わが家のしたくに<br>カスタマイズ</div>
 <div class="set-screen">
-  <div class="set-head"><div class="back">‹ もどる</div><div class="ttl">⚙️ せってい</div><div class="rst">リセット</div></div>
+  <div class="set-head"><div class="back" style="font-size:54px">‹</div><div class="ttl">カード（表）</div><div class="back">保存</div></div>
   <div class="set-tabs"><div class="stab on">☀️ あさ</div><div class="stab">🌙 よる</div></div>
-  <div class="set-hint">アイコンとなまえをかえられます</div>
   <div class="row"><div class="num">1</div><div class="emo">😴</div><div class="lab">ぱじゃまをぬぐ</div></div>
   <div class="row"><div class="num">2</div><div class="emo">👕</div><div class="lab">きがえ</div></div>
   <div class="row"><div class="num">3</div><div class="emo">🧦</div><div class="lab">くつした</div></div>
