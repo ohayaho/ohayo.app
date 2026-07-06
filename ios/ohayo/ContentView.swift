@@ -5,8 +5,10 @@ import StoreKit
 
 // Single non-consumable unlock for all premium editing features.
 let kPremiumProductID = "app.ohayo.ohayo.premium"
-// The card-back image may be set this many times for free; further changes need premium.
-let kFreeCardBackChanges = 1
+// The card-back / clear images may each be set this many times for free;
+// further changes need premium. Keep the two counts aligned (product decision).
+let kFreeCardBackChanges = 2
+let kFreeClearChanges = 2
 
 #if DEBUG
 // TESTING ONLY: force premium unlocked in Debug builds so paid features can be
@@ -120,6 +122,9 @@ struct ContentView: UIViewRepresentable {
                 case "consumeCardBack":
                     store.consumeCardBackChange()
                     pushState()
+                case "consumeClear":
+                    store.consumeClearChange()
+                    pushState()
                 default:
                     break
                 }
@@ -134,6 +139,9 @@ struct ContentView: UIViewRepresentable {
                 "canChangeCardBack": store.canChangeCardBack(),
                 "cardBackChangesUsed": store.cardBackChangesUsed,
                 "freeCardBackChanges": kFreeCardBackChanges,
+                "canChangeClear": store.canChangeClear(),
+                "clearChangesUsed": store.clearChangesUsed,
+                "freeClearChanges": kFreeClearChanges,
             ]
             if let price = store.product?.displayPrice { dict["price"] = price }
             extra.forEach { dict[$0] = $1 }
@@ -156,6 +164,7 @@ final class Store: ObservableObject {
     private var updatesTask: Task<Void, Never>?
 
     private let cardBackKey = "cardBackChangesUsed"
+    private let clearKey    = "clearChangesUsed"
 
     init() {
         updatesTask = observeTransactionUpdates()
@@ -227,7 +236,7 @@ final class Store: ObservableObject {
         }
     }
 
-    // MARK: Card-back free-change counter (native-owned; not reachable from JS/localStorage)
+    // MARK: Free-change counters (native-owned; not reachable from JS/localStorage)
 
     var cardBackChangesUsed: Int { UserDefaults.standard.integer(forKey: cardBackKey) }
 
@@ -238,5 +247,16 @@ final class Store: ObservableObject {
     func consumeCardBackChange() {
         guard !isPremium else { return }
         UserDefaults.standard.set(cardBackChangesUsed + 1, forKey: cardBackKey)
+    }
+
+    var clearChangesUsed: Int { UserDefaults.standard.integer(forKey: clearKey) }
+
+    func canChangeClear() -> Bool {
+        isPremium || clearChangesUsed < kFreeClearChanges
+    }
+
+    func consumeClearChange() {
+        guard !isPremium else { return }
+        UserDefaults.standard.set(clearChangesUsed + 1, forKey: clearKey)
     }
 }

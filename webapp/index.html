@@ -862,12 +862,12 @@
     </button>
     <button class="menu-row" onclick="openRewardPage()">
       <span class="menu-ic"><svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" width="44" height="44"><defs><clipPath id="ic-bk"><rect x="0" y="0" width="44" height="44" rx="9"/></clipPath><linearGradient id="ic-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd3ff"/><stop offset="1" stop-color="#dff4ff"/></linearGradient></defs><g clip-path="url(#ic-bk)"><rect x="0" y="0" width="44" height="44" fill="url(#ic-sky)"/><circle cx="33" cy="12" r="5" fill="#ffe27a"/><path d="M-2,46 Q11,27 22,32 Q33,37 46,28 L46,46 Z" fill="#8bd18b"/><path d="M-2,46 Q14,34 26,38 Q36,41 46,35 L46,46 Z" fill="#68bd68"/><line x1="14.67" y1="0" x2="14.67" y2="44" stroke="#fff" stroke-width="1.3" opacity="0.92"/><line x1="29.33" y1="0" x2="29.33" y2="44" stroke="#fff" stroke-width="1.3" opacity="0.92"/><line x1="0" y1="22" x2="44" y2="22" stroke="#fff" stroke-width="1.3" opacity="0.92"/></g><rect x="0.5" y="0.5" width="43" height="43" rx="8.5" fill="none" stroke="#dfe0ea" stroke-width="1"/></svg></span>
-      <span class="menu-tx"><b>カード（裏）</b><small><span class="free-em">1回まで変更無料！<br></span>カードをタップしたときに表示される画像を変更します</small></span>
+      <span class="menu-tx"><b>カード（裏）</b><small><span class="free-em">2回まで変更無料！<br></span>カードをタップしたときに表示される画像を変更します</small></span>
       <span class="menu-arrow">›</span>
     </button>
     <button class="menu-row" onclick="openClearPage()">
       <span class="menu-ic"><svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" width="44" height="44"><defs><radialGradient id="ic-cg" cx="0.5" cy="0.42" r="0.72"><stop offset="0" stop-color="#fff59d"/><stop offset="1" stop-color="#ffce3d"/></radialGradient><clipPath id="ic-cc"><rect x="0" y="0" width="44" height="44" rx="9"/></clipPath></defs><g clip-path="url(#ic-cc)"><rect width="44" height="44" fill="url(#ic-cg)"/><rect x="7" y="9" width="2.6" height="2.6" rx="0.6" fill="#ff6b6b" transform="rotate(20 7 9)"/><rect x="35.5" y="8" width="2.6" height="2.6" rx="0.6" fill="#4d96ff" transform="rotate(20 35.5 8)"/><rect x="9" y="33" width="2.6" height="2.6" rx="0.6" fill="#6bcb77" transform="rotate(20 9 33)"/><rect x="35" y="34" width="2.6" height="2.6" rx="0.6" fill="#cc5de8" transform="rotate(20 35 34)"/><rect x="21" y="5.5" width="2.6" height="2.6" rx="0.6" fill="#ff922b" transform="rotate(20 21 5.5)"/><rect x="5.5" y="20" width="2.6" height="2.6" rx="0.6" fill="#f06595" transform="rotate(20 5.5 20)"/><rect x="38" y="22" width="2.6" height="2.6" rx="0.6" fill="#3bc9db" transform="rotate(20 38 22)"/><path d="M22.00,12.30 L23.94,17.83 L29.80,17.97 L25.14,21.52 L26.82,27.13 L22.00,23.80 L17.18,27.13 L18.86,21.52 L14.20,17.97 L20.06,17.83 Z" fill="#ff5252" stroke="#fff" stroke-width="0.9" stroke-linejoin="round"/></g><rect x="0.5" y="0.5" width="43" height="43" rx="8.5" fill="none" stroke="#f0d68a" stroke-width="1"/></svg></span>
-      <span class="menu-tx"><b>クリア画像</b><small>全てのカードをタップしたときに表示する画像を変更します</small></span>
+      <span class="menu-tx"><b>クリア画像</b><small><span class="free-em">2回まで変更無料！<br></span>全てのカードをタップしたときに表示する画像を変更します</small></span>
       <span class="menu-arrow">›</span>
     </button>
     <button class="menu-row danger" id="menu-reset" onclick="resetDefaults()">
@@ -917,7 +917,7 @@
   </div>
 
   <div class="free-note" id="reward-free-note" style="display:none;">
-    <span id="reward-free-msg">無料版では変更は1回までです</span>
+    <span id="reward-free-msg">無料版では変更は2回までです</span>
     <button class="free-cta" id="reward-premium-cta" style="display:none;" onclick="openPaywall('cardback')">✨ プレミアムで何度でも変更 ›</button>
   </div>
 
@@ -948,18 +948,23 @@
     <button class="stab"        id="cstab-neru" onclick="switchClearTab('neru')">🌙 夜<span class="premium-lock" aria-label="プレミアム">🔒</span></button>
   </div>
 
+  <div class="free-note" id="clear-free-note" style="display:none;">
+    <span id="clear-free-msg">無料版では変更は2回までです</span>
+    <button class="free-cta" id="clear-premium-cta" style="display:none;" onclick="openPaywall('clearimg')">✨ プレミアムで何度でも変更 ›</button>
+  </div>
+
   <div class="reward-section">
     <div class="reward-desc">全部できたときの画面いっぱいに表示されます</div>
     <div class="reward-frame" id="clear-frame">🎉</div>
     <input type="range" id="clear-zoom" class="reward-zoom" min="1" max="3" step="0.01" value="1" oninput="edZoom(ED_CLEAR, this.value)">
     <div class="reward-hint" id="clear-hint">ドラッグで位置、スライダーで大きさを調整</div>
     <div class="reward-btns">
-      <button class="reward-btn" onclick="document.getElementById('clear-file').click()">画像を選ぶ</button>
+      <button class="reward-btn" id="clear-choose" onclick="document.getElementById('clear-file').click()">画像を選ぶ</button>
     </div>
     <input type="file" id="clear-file" accept="image/*" onchange="edHandleFile(ED_CLEAR, this)">
   </div>
 
-  <button class="save-btn" onclick="saveClear()">💾 セーブ</button>
+  <button class="save-btn" id="clear-save" onclick="saveClear()">💾 セーブ</button>
 </div>
 
 <!-- ===== PAYWALL ===== -->
@@ -969,8 +974,9 @@
     <h3 class="paywall-title"><span class="paywall-spark">✨</span><span class="paywall-titletxt">プレミアムで<br>もっと自由に</span></h3>
     <ul class="paywall-feats">
       <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>よるモードを全部使える</li>
-      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>よるのカード・画像も設定できる</li>
+      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>よるのカード・画像も設定</li>
       <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>カードの裏を何度でも変更</li>
+      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>クリア画像を何度でも変更</li>
       <li class="soon"><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M12 6.4 V17.6 M6.4 12 H17.6" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>今後も新機能を追加予定！</li>
     </ul>
     <button class="paywall-buy" id="paywall-buy" onclick="paywallBuy()">
@@ -1266,9 +1272,12 @@
     state: {
       premium: false,
       available: false,
-      canChangeCardBack: true,   // うら画像の初回変更は無料
+      canChangeCardBack: true,   // うら・クリア画像は各2回まで変更無料
       cardBackChangesUsed: 0,
-      freeCardBackChanges: 1,
+      freeCardBackChanges: 2,
+      canChangeClear: true,
+      clearChangesUsed: 0,
+      freeClearChanges: 2,
       price: null,
     },
 
@@ -1283,11 +1292,16 @@
     purchase()        { this._send('purchase'); },
     restore()         { this._send('restore'); },
     consumeCardBack() { this._send('consumeCardBack'); },
+    consumeClear()    { this._send('consumeClear'); },
 
     isPremium()         { return !!this.state.premium; },
     canChangeCardBack() {
       return !!this.state.premium ||
              (this.state.cardBackChangesUsed < this.state.freeCardBackChanges);
+    },
+    canChangeClear() {
+      return !!this.state.premium ||
+             (this.state.clearChangesUsed < this.state.freeClearChanges);
     },
 
     // ネイティブ（ContentView.swift の pushState）から呼ばれる。
@@ -1306,7 +1320,7 @@
     document.querySelectorAll('.premium-lock').forEach(el => {
       el.style.display = prem ? 'none' : '';
     });
-    // 「1回まで変更無料！」はプレミアム購入後は不要なので非表示
+    // 「2回まで変更無料！」はプレミアム購入後は不要なので非表示
     document.querySelectorAll('.free-em').forEach(el => {
       el.style.display = prem ? 'none' : '';
     });
@@ -1314,6 +1328,7 @@
       updatePaywallState();
     }
     updateRewardFreeNote();
+    updateClearFreeNote();
   }
 
   let rewardEditLocked = false;   // 編集ロック中（あさ無料枠使い切り or よる未購入）
@@ -1360,6 +1375,40 @@
     });
   }
 
+  let clearEditLocked = false;   // クリア画像の編集ロック中（あさ無料枠使い切り）
+
+  // クリア画像ページ上部のバナー＋プレミアム導線。カードの裏と同じ「回数まで無料」方式。
+  // 未購入は夜タブ自体に入れないので、あさの無料枠だけ見ればよい。
+  function updateClearFreeNote() {
+    const note = document.getElementById('clear-free-note');
+    const msg  = document.getElementById('clear-free-msg');
+    const cta  = document.getElementById('clear-premium-cta');
+    const prem = OhayoStore.isPremium();
+    if (prem) { if (note) note.style.display = 'none'; applyClearLock(); return; }
+
+    if (note) note.style.display = '';
+    const used = OhayoStore.state.clearChangesUsed;
+    const free = OhayoStore.state.freeClearChanges;
+    const exhausted = used >= free;
+    if (msg) msg.innerHTML = exhausted
+      ? '無料の変更を使いました。<br>変更するにはプレミアムが必要です'
+      : `無料版では変更は${free}回までです`;
+    if (cta) cta.style.display = exhausted ? '' : 'none';   // CTAは使い切った時だけ表示
+    applyClearLock();
+  }
+
+  function applyClearLock() {
+    const locked = !OhayoStore.isPremium() &&
+      (OhayoStore.state.clearChangesUsed >= OhayoStore.state.freeClearChanges);
+    clearEditLocked = locked;
+    const sec = document.querySelector('#settings-clear .reward-section');
+    if (sec) sec.classList.toggle('locked', locked);
+    ['clear-zoom', 'clear-choose', 'clear-save'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = locked;
+    });
+  }
+
   function handleStoreState(obj, wasPremium) {
     refreshPremiumUI();
     const nowPremium = OhayoStore.isPremium();
@@ -1383,7 +1432,7 @@
     if (act === 'night')           switchMode('neru');
     else if (act === 'tasks-neru') switchSettingsTab('neru');   // 押した夜タブへそのまま移動
     else if (act === 'clear-neru') switchClearTab('neru');
-    // 'cardback' の場合はユーザーがうら画像ページに残っているので、そのままセーブできる
+    // 'cardback'・'clearimg' はユーザーが該当ページに残っているので、そのままセーブできる
   }
 
   /* ── paywall modal ── */
@@ -1622,6 +1671,7 @@
     placeholder: '🎉',
     aspect: () => (window.innerWidth / window.innerHeight) || 0.46,
     get: () => settingsClearCfg[clearEditMode], set: (v) => { settingsClearCfg[clearEditMode] = v; },
+    locked: () => clearEditLocked,
   };
 
   // Match the editor frame's aspect ratio to where the image will show.
@@ -1800,6 +1850,7 @@
     document.getElementById('settings-clear').classList.add('open');
     edSizeFrame(ED_CLEAR);
     edUpdate(ED_CLEAR);
+    updateClearFreeNote();
   }
   function closeClearPage() { document.getElementById('settings-clear').classList.remove('open'); }
 
@@ -1810,15 +1861,33 @@
     setActiveTab('cstab', mode);
     edSizeFrame(ED_CLEAR);
     edUpdate(ED_CLEAR);
+    updateClearFreeNote();
   }
 
   function saveClear() {
+    if (!OhayoStore.isPremium()) {
+      // 未購入は あさ のみ編集可能（夜タブには入れない）。カードの裏と同じ回数制無料ルール。
+      const before       = clearCfg.asa          ? JSON.stringify(clearCfg.asa)          : '';
+      const after        = settingsClearCfg.asa  ? JSON.stringify(settingsClearCfg.asa)  : '';
+      const changed      = before !== after;
+      const settingImage = !!settingsClearCfg.asa;   // 「消す」は無料扱い
+      if (changed && settingImage && !OhayoStore.canChangeClear()) {
+        openPaywall('clearimg');
+        return;   // ページは開いたまま・保存しない
+      }
+      clearCfg = {
+        asa:  settingsClearCfg.asa ? { ...settingsClearCfg.asa } : null,
+        neru: clearCfg.neru,   // よるは触れないので現状維持
+      };
+      saveToStorage();
+      closeClearPage();
+      if (changed && settingImage) OhayoStore.consumeClear();   // 無料カウンタを1消費
+      return;
+    }
+    // プレミアム：両モードまとめて保存
     clearCfg = {
-      asa:  settingsClearCfg.asa ? { ...settingsClearCfg.asa } : null,
-      // 未購入は夜タブに入れないが、念のため よる は現状維持
-      neru: OhayoStore.isPremium()
-        ? (settingsClearCfg.neru ? { ...settingsClearCfg.neru } : null)
-        : clearCfg.neru,
+      asa:  settingsClearCfg.asa  ? { ...settingsClearCfg.asa }  : null,
+      neru: settingsClearCfg.neru ? { ...settingsClearCfg.neru } : null,
     };
     saveToStorage();
     closeClearPage();
