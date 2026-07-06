@@ -858,7 +858,6 @@
     <button class="menu-row" onclick="openTasksPage()">
       <span class="menu-ic"><svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" width="44" height="44"><rect x="0" y="0" width="44" height="44" rx="9" fill="#eef1fb"/><rect x="4.50" y="4.50" width="9.67" height="16.00" rx="2.4" fill="#fff" stroke="#e4e4ef" stroke-width="0.6"/><rect x="6.00" y="6.10" width="6.67" height="1.9" rx="0.95" fill="#ff8aaa"/><circle cx="9.33" cy="13.70" r="2.2" fill="#d7d7e3"/><rect x="17.17" y="4.50" width="9.67" height="16.00" rx="2.4" fill="#fff" stroke="#e4e4ef" stroke-width="0.6"/><rect x="18.67" y="6.10" width="6.67" height="1.9" rx="0.95" fill="#ffb74d"/><circle cx="22.00" cy="13.70" r="2.2" fill="#d7d7e3"/><rect x="29.83" y="4.50" width="9.67" height="16.00" rx="2.4" fill="#fff" stroke="#e4e4ef" stroke-width="0.6"/><rect x="31.33" y="6.10" width="6.67" height="1.9" rx="0.95" fill="#4fc3f7"/><circle cx="34.67" cy="13.70" r="2.2" fill="#d7d7e3"/><rect x="4.50" y="23.50" width="9.67" height="16.00" rx="2.4" fill="#fff" stroke="#e4e4ef" stroke-width="0.6"/><rect x="6.00" y="25.10" width="6.67" height="1.9" rx="0.95" fill="#81c784"/><circle cx="9.33" cy="32.70" r="2.2" fill="#d7d7e3"/><rect x="17.17" y="23.50" width="9.67" height="16.00" rx="2.4" fill="#fff" stroke="#e4e4ef" stroke-width="0.6"/><rect x="18.67" y="25.10" width="6.67" height="1.9" rx="0.95" fill="#9575cd"/><circle cx="22.00" cy="32.70" r="2.2" fill="#d7d7e3"/><rect x="29.83" y="23.50" width="9.67" height="16.00" rx="2.4" fill="#fff" stroke="#e4e4ef" stroke-width="0.6"/><rect x="31.33" y="25.10" width="6.67" height="1.9" rx="0.95" fill="#f06292"/><circle cx="34.67" cy="32.70" r="2.2" fill="#d7d7e3"/></svg></span>
       <span class="menu-tx"><b>カード（表）</b><small>「はみがき」「きがえ」など、各したくのアイコンと名前を変更します</small></span>
-      <span class="premium-lock" aria-label="プレミアム">🔒</span>
       <span class="menu-arrow">›</span>
     </button>
     <button class="menu-row" onclick="openRewardPage()">
@@ -869,7 +868,6 @@
     <button class="menu-row" onclick="openClearPage()">
       <span class="menu-ic"><svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" width="44" height="44"><defs><radialGradient id="ic-cg" cx="0.5" cy="0.42" r="0.72"><stop offset="0" stop-color="#fff59d"/><stop offset="1" stop-color="#ffce3d"/></radialGradient><clipPath id="ic-cc"><rect x="0" y="0" width="44" height="44" rx="9"/></clipPath></defs><g clip-path="url(#ic-cc)"><rect width="44" height="44" fill="url(#ic-cg)"/><rect x="7" y="9" width="2.6" height="2.6" rx="0.6" fill="#ff6b6b" transform="rotate(20 7 9)"/><rect x="35.5" y="8" width="2.6" height="2.6" rx="0.6" fill="#4d96ff" transform="rotate(20 35.5 8)"/><rect x="9" y="33" width="2.6" height="2.6" rx="0.6" fill="#6bcb77" transform="rotate(20 9 33)"/><rect x="35" y="34" width="2.6" height="2.6" rx="0.6" fill="#cc5de8" transform="rotate(20 35 34)"/><rect x="21" y="5.5" width="2.6" height="2.6" rx="0.6" fill="#ff922b" transform="rotate(20 21 5.5)"/><rect x="5.5" y="20" width="2.6" height="2.6" rx="0.6" fill="#f06595" transform="rotate(20 5.5 20)"/><rect x="38" y="22" width="2.6" height="2.6" rx="0.6" fill="#3bc9db" transform="rotate(20 38 22)"/><path d="M22.00,12.30 L23.94,17.83 L29.80,17.97 L25.14,21.52 L26.82,27.13 L22.00,23.80 L17.18,27.13 L18.86,21.52 L14.20,17.97 L20.06,17.83 Z" fill="#ff5252" stroke="#fff" stroke-width="0.9" stroke-linejoin="round"/></g><rect x="0.5" y="0.5" width="43" height="43" rx="8.5" fill="none" stroke="#f0d68a" stroke-width="1"/></svg></span>
       <span class="menu-tx"><b>クリア画像</b><small>全てのカードをタップしたときに表示する画像を変更します</small></span>
-      <span class="premium-lock" aria-label="プレミアム">🔒</span>
       <span class="menu-arrow">›</span>
     </button>
     <button class="menu-row danger" id="menu-reset" onclick="resetDefaults()">
@@ -895,7 +893,7 @@
 
   <div class="settings-tabs">
     <button class="stab active" id="stab-asa"  onclick="switchSettingsTab('asa')">☀️ 朝</button>
-    <button class="stab"        id="stab-neru" onclick="switchSettingsTab('neru')">🌙 夜</button>
+    <button class="stab"        id="stab-neru" onclick="switchSettingsTab('neru')">🌙 夜<span class="premium-lock" aria-label="プレミアム">🔒</span></button>
   </div>
 
   <p class="settings-hint">アイコンと名前を変えられます</p>
@@ -947,7 +945,7 @@
 
   <div class="settings-tabs">
     <button class="stab active" id="cstab-asa"  onclick="switchClearTab('asa')">☀️ 朝</button>
-    <button class="stab"        id="cstab-neru" onclick="switchClearTab('neru')">🌙 夜</button>
+    <button class="stab"        id="cstab-neru" onclick="switchClearTab('neru')">🌙 夜<span class="premium-lock" aria-label="プレミアム">🔒</span></button>
   </div>
 
   <div class="reward-section">
@@ -970,10 +968,9 @@
     <button class="paywall-x" onclick="closePaywall()" aria-label="とじる">✕</button>
     <h3 class="paywall-title"><span class="paywall-spark">✨</span><span class="paywall-titletxt">プレミアムで<br>もっと自由に</span></h3>
     <ul class="paywall-feats">
-      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>カードのアイコン・名前を変更</li>
-      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>クリア画像を設定</li>
-      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>カードの裏を何度でも変更</li>
       <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>よるモードを全部使える</li>
+      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>よるのカード・画像も設定できる</li>
+      <li><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M6.4 12.4 L10.3 16.3 L17.6 8.1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>カードの裏を何度でも変更</li>
       <li class="soon"><svg class="chk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#ff5a87"/><path d="M12 6.4 V17.6 M6.4 12 H17.6" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>今後も新機能を追加予定！</li>
     </ul>
     <button class="paywall-buy" id="paywall-buy" onclick="paywallBuy()">
@@ -1302,7 +1299,6 @@
   };
 
   let pendingPremiumAction = null;   // 解放前にユーザーが押した機能
-  let paywallPeekPage = null;        // ペイウォールの裏に見せている設定画面のid
 
   // 権利の状態をUI全体（ロック表示・ペイウォールのボタン）へ反映。
   function refreshPremiumUI() {
@@ -1314,9 +1310,6 @@
     document.querySelectorAll('.free-em').forEach(el => {
       el.style.display = prem ? 'none' : '';
     });
-    // 無料版はカード編集自体ができないので「初期状態に戻す」は非活性。
-    const reset = document.getElementById('menu-reset');
-    if (reset) reset.disabled = !prem;
     if (document.getElementById('paywall').classList.contains('open')) {
       updatePaywallState();
     }
@@ -1387,28 +1380,21 @@
     closePaywall();
     const act = pendingPremiumAction;
     pendingPremiumAction = null;
-    if (act === 'tasks')      openTasksPage();
-    else if (act === 'clear') openClearPage();
-    else if (act === 'night') switchMode('neru');
+    if (act === 'night')           switchMode('neru');
+    else if (act === 'tasks-neru') switchSettingsTab('neru');   // 押した夜タブへそのまま移動
+    else if (act === 'clear-neru') switchClearTab('neru');
     // 'cardback' の場合はユーザーがうら画像ページに残っているので、そのままセーブできる
   }
 
   /* ── paywall modal ── */
-  function openPaywall(intent, peekPage) {
+  function openPaywall(intent) {
     pendingPremiumAction = intent || null;
-    paywallPeekPage = peekPage || null;   // 裏に見せている設定画面（閉じたら一緒に閉じる）
     document.getElementById('paywall-note').textContent = '1回のお支払いでずっと使えます';
     updatePaywallState();
     document.getElementById('paywall').classList.add('open');
   }
   function closePaywall() {
     document.getElementById('paywall').classList.remove('open');
-    // 未購入のまま閉じたら、裏に見せていた設定画面も閉じる（編集させない）
-    if (paywallPeekPage) {
-      const p = document.getElementById(paywallPeekPage);
-      if (p) p.classList.remove('open');
-      paywallPeekPage = null;
-    }
   }
   function updatePaywallState() {
     const s     = OhayoStore.state;
@@ -1606,15 +1592,14 @@
     updateSettingsTabs();
     buildSettingsForm();
     document.getElementById('settings-tasks').classList.add('open');
-    // 未購入は実際の編集画面を裏に見せつつペイウォール（閉じたら裏画面も閉じる）
-    if (!OhayoStore.isPremium()) openPaywall('tasks', 'settings-tasks');
   }
   function closeTasksPage() { document.getElementById('settings-tasks').classList.remove('open'); }
 
   function saveTasks() {
     collectFormToBuffer();
-    MODES.asa.tasks  = settingsBuffer.asa.map(t  => ({...t}));
-    MODES.neru.tasks = settingsBuffer.neru.map(t => ({...t}));
+    MODES.asa.tasks = settingsBuffer.asa.map(t => ({...t}));
+    // 未購入は夜タブに入れないが、念のため よる への書き込み自体を封じる
+    if (OhayoStore.isPremium()) MODES.neru.tasks = settingsBuffer.neru.map(t => ({...t}));
     saveToStorage();
     doneCount = 0;
     clearCelebration();
@@ -1815,13 +1800,12 @@
     document.getElementById('settings-clear').classList.add('open');
     edSizeFrame(ED_CLEAR);
     edUpdate(ED_CLEAR);
-    // 未購入は実際の設定画面を裏に見せつつペイウォール（閉じたら裏画面も閉じる）
-    if (!OhayoStore.isPremium()) openPaywall('clear', 'settings-clear');
   }
   function closeClearPage() { document.getElementById('settings-clear').classList.remove('open'); }
 
   function switchClearTab(mode) {
     if (mode === clearEditMode) return;
+    if (mode === 'neru' && !OhayoStore.isPremium()) { openPaywall('clear-neru'); return; }   // 夜のクリア画像はプレミアム限定
     clearEditMode = mode;
     setActiveTab('cstab', mode);
     edSizeFrame(ED_CLEAR);
@@ -1830,8 +1814,11 @@
 
   function saveClear() {
     clearCfg = {
-      asa:  settingsClearCfg.asa  ? { ...settingsClearCfg.asa }  : null,
-      neru: settingsClearCfg.neru ? { ...settingsClearCfg.neru } : null,
+      asa:  settingsClearCfg.asa ? { ...settingsClearCfg.asa } : null,
+      // 未購入は夜タブに入れないが、念のため よる は現状維持
+      neru: OhayoStore.isPremium()
+        ? (settingsClearCfg.neru ? { ...settingsClearCfg.neru } : null)
+        : clearCfg.neru,
     };
     saveToStorage();
     closeClearPage();
@@ -1839,6 +1826,7 @@
 
   function switchSettingsTab(mode) {
     if (mode === currentSettingsTab) return;
+    if (mode === 'neru' && !OhayoStore.isPremium()) { openPaywall('tasks-neru'); return; }   // 夜のカード編集はプレミアム限定
     collectFormToBuffer();      // 現在のフォームをバッファに保存
     currentSettingsTab = mode;
     updateSettingsTabs();
@@ -1883,7 +1871,6 @@
   }
 
   function resetDefaults() {
-    if (!OhayoStore.isPremium()) { openPaywall('tasks'); return; }
     showConfirm('設定が全て初期化されます。本当にリセットしますか？', doResetDefaults);
   }
   function doResetDefaults() {

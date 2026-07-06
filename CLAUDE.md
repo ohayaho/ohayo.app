@@ -14,7 +14,7 @@
 
 ## マネタイズ（v1.2〜）
 - 買い切り（非消費型）IAP `app.ohayo.ohayo.premium`。プレミアム判定は**ネイティブ（StoreKit）が正**で、JSは `window.OhayoStore` 経由で状態を受け取るだけ
-- 無料版：あさモード＋カード裏画像の初回1回変更のみ
+- 無料版（v1.2.1〜）：あさモードは全部無料（カード表の編集・クリア画像の変更を含む）。カード裏画像は初回1回のみ無料。**よる関連はすべて有料**（モード切替・夜のカード編集・夜の画像設定）
 
 ## データ永続化
 - `localStorage` キー: `shitaku_custom_tasks` / `shitaku_reward_image` / `shitaku_clear_image`（画像は `{asa, neru}` のモード別）
