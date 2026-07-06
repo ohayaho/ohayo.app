@@ -397,6 +397,10 @@
       color: #333;
       font-weight: bold;
       white-space: nowrap;
+      /* 幅が足りない端末ではタイトル側を縮めて省略（右端のボタンを見切れさせない） */
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .back-btn {
@@ -424,11 +428,12 @@
       background: linear-gradient(135deg, #ff5a87, #ff8c69);
       border: none;
       border-radius: 50px;
-      padding: 8px 18px;
+      padding: 8px 16px;
       box-shadow: 0 3px 10px rgba(255,90,135,0.4);
       cursor: pointer;
       touch-action: manipulation;
       white-space: nowrap;
+      flex-shrink: 0;   /* 幅が足りない時もヘッダー右端で見切れないように */
     }
 
     .head-save:active { transform: scale(0.95); box-shadow: 0 1px 5px rgba(255,90,135,0.3); }
@@ -906,7 +911,7 @@
   <div class="settings-header">
     <button class="back-btn" onclick="closeTasksPage()">← 戻る</button>
     <h2>🃏 カード（表）</h2>
-    <button class="head-save" onclick="saveTasks()">セーブ</button>
+    <button class="head-save" onclick="saveTasks()">保存</button>
   </div>
 
   <div class="settings-tabs">
@@ -918,7 +923,7 @@
 
   <div class="settings-list" id="settings-list"></div>
 
-  <button class="save-btn" onclick="saveTasks()">💾 セーブ</button>
+  <button class="save-btn" onclick="saveTasks()">💾 保存</button>
 </div>
 
 <!-- ===== SETTINGS — カードのうら ===== -->
@@ -950,7 +955,7 @@
     <input type="file" id="reward-file" accept="image/*" onchange="edHandleFile(ED_REWARD, this)">
   </div>
 
-  <button class="save-btn" id="reward-save" onclick="saveReward()">💾 セーブ</button>
+  <button class="save-btn" id="reward-save" onclick="saveReward()">💾 保存</button>
 </div>
 
 <!-- ===== SETTINGS — クリア ===== -->
@@ -982,7 +987,7 @@
     <input type="file" id="clear-file" accept="image/*" onchange="edHandleFile(ED_CLEAR, this)">
   </div>
 
-  <button class="save-btn" id="clear-save" onclick="saveClear()">💾 セーブ</button>
+  <button class="save-btn" id="clear-save" onclick="saveClear()">💾 保存</button>
 </div>
 
 <!-- ===== PAYWALL ===== -->
