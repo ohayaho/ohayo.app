@@ -415,6 +415,24 @@
 
     .back-btn:active { background: #f0f0f0; }
 
+    /* header-right compact save (pill) — pairs with the big bottom save-btn */
+    .head-save {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(135deg, #ff5a87, #ff8c69);
+      border: none;
+      border-radius: 50px;
+      padding: 8px 18px;
+      box-shadow: 0 3px 10px rgba(255,90,135,0.4);
+      cursor: pointer;
+      touch-action: manipulation;
+      white-space: nowrap;
+    }
+
+    .head-save:active { transform: scale(0.95); box-shadow: 0 1px 5px rgba(255,90,135,0.3); }
+
     .reset-btn {
       font-family: inherit;
       font-size: 0.9rem;
@@ -888,7 +906,7 @@
   <div class="settings-header">
     <button class="back-btn" onclick="closeTasksPage()">← 戻る</button>
     <h2>🃏 カード（表）</h2>
-    <span class="header-spacer"></span>
+    <button class="head-save" onclick="saveTasks()">セーブ</button>
   </div>
 
   <div class="settings-tabs">
