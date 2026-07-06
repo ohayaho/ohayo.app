@@ -1369,10 +1369,10 @@
     set('clear-free-em',  OhayoStore.state.clearChangesUsed,    OhayoStore.state.freeClearChanges);
   }
 
-  let rewardEditLocked = false;   // 編集ロック中（あさ無料枠使い切り or よる未購入）
+  let rewardEditLocked = false;   // カードの裏の編集ロック中（あさ無料枠使い切り）
 
-  // カードの裏ページ上部のバナー＋プレミアム導線。編集中モードと購入状況で切替。
-  //   あさ：初回無料 → 使い切りでロック   よる：プレミアム限定（未購入は常にロック）
+  // カードの裏ページ上部のバナー＋プレミアム導線。クリア画像と同じ「回数まで無料」方式。
+  // 未購入は夜タブ自体に入れないので、あさの無料枠だけ見ればよい。
   function updateRewardFreeNote() {
     const note = document.getElementById('reward-free-note');
     const msg  = document.getElementById('reward-free-msg');
@@ -1381,29 +1381,19 @@
     if (prem) { if (note) note.style.display = 'none'; applyRewardLock(); return; }
 
     if (note) note.style.display = '';
-    if (rewardEditMode === 'neru') {
-      if (msg) msg.innerHTML = '夜のカードの裏はプレミアム限定です';
-      if (cta) cta.style.display = '';
-    } else {
-      const used = OhayoStore.state.cardBackChangesUsed;
-      const free = OhayoStore.state.freeCardBackChanges;
-      const exhausted = used >= free;
-      if (msg) msg.innerHTML = exhausted
-        ? '無料の変更を使いました。<br>変更するにはプレミアムが必要です'
-        : `あと${free - used}回まで変更無料です`;
-      if (cta) cta.style.display = exhausted ? '' : 'none';   // CTAは使い切った時だけ表示
-    }
+    const used = OhayoStore.state.cardBackChangesUsed;
+    const free = OhayoStore.state.freeCardBackChanges;
+    const exhausted = used >= free;
+    if (msg) msg.innerHTML = exhausted
+      ? '無料の変更を使いました。<br>変更するにはプレミアムが必要です'
+      : `あと${free - used}回まで変更無料です`;
+    if (cta) cta.style.display = exhausted ? '' : 'none';   // CTAは使い切った時だけ表示
     applyRewardLock();
   }
 
-  // 編集操作の非活性化。あさ＝無料枠使い切り時、よる＝未購入時にロック。
   function applyRewardLock() {
-    let locked = false;
-    if (!OhayoStore.isPremium()) {
-      locked = (rewardEditMode === 'neru')
-        ? true
-        : (OhayoStore.state.cardBackChangesUsed >= OhayoStore.state.freeCardBackChanges);
-    }
+    const locked = !OhayoStore.isPremium() &&
+      (OhayoStore.state.cardBackChangesUsed >= OhayoStore.state.freeCardBackChanges);
     rewardEditLocked = locked;
     const sec = document.querySelector('#settings-reward .reward-section');
     if (sec) sec.classList.toggle('locked', locked);
@@ -1467,9 +1457,10 @@
     closePaywall();
     const act = pendingPremiumAction;
     pendingPremiumAction = null;
-    if (act === 'night')           switchMode('neru');
-    else if (act === 'tasks-neru') switchSettingsTab('neru');   // 押した夜タブへそのまま移動
-    else if (act === 'clear-neru') switchClearTab('neru');
+    if (act === 'night')            switchMode('neru');
+    else if (act === 'tasks-neru')  switchSettingsTab('neru');   // 押した夜タブへそのまま移動
+    else if (act === 'reward-neru') switchRewardTab('neru');
+    else if (act === 'clear-neru')  switchClearTab('neru');
     // 'cardback'・'clearimg' はユーザーが該当ページに残っているので、そのままセーブできる
   }
 
@@ -1839,6 +1830,7 @@
 
   function switchRewardTab(mode) {
     if (mode === rewardEditMode) return;
+    if (mode === 'neru' && !OhayoStore.isPremium()) { openPaywall('reward-neru'); return; }   // 夜のカードの裏はプレミアム限定
     rewardEditMode = mode;   // 画像バッファはモード別に保持済み。切替で再描画するだけ。
     setActiveTab('rstab', mode);
     edSizeFrame(ED_REWARD);
